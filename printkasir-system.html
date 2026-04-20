@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrintKasir Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --blue:#3B82F6;--blue-d:#2563EB;--blue-l:#EFF6FF;--blue-m:#BFDBFE;
+  --green:#10B981;--green-d:#059669;--green-l:#ECFDF5;
+  --orange:#F59E0B;--orange-d:#D97706;--orange-l:#FFFBEB;--orange-m:#FDE68A;
+  --red:#EF4444;--red-d:#DC2626;--red-l:#FEF2F2;
+  --purple:#8B5CF6;--purple-l:#F5F3FF;
+  --gray-50:#F9FAFB;--gray-100:#F3F4F6;--gray-200:#E5E7EB;
+  --gray-300:#D1D5DB;--gray-400:#9CA3AF;--gray-500:#6B7280;
+  --gray-700:#374151;--gray-900:#111827;--white:#FFFFFF;
+  --sh:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --sh-md:0 4px 16px rgba(0,0,0,0.08),0 2px 6px rgba(0,0,0,0.04);
+  --sh-lg:0 20px 48px rgba(0,0,0,0.12),0 8px 16px rgba(0,0,0,0.06);
+  --r:10px;--rl:14px;--rxl:20px;
+  --font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--gray-50);color:var(--gray-900);font-size:13px;min-height:100vh}
+.hidden{display:none!important}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:99px}
+
+/* ── SHARED ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 16px;border-radius:var(--r);border:1.5px solid transparent;cursor:pointer;font-size:12px;font-weight:600;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.btn:active{transform:scale(0.98)}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 2px 8px rgba(59,130,246,.25)}.btn-blue:hover{background:var(--blue-d)}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green);box-shadow:0 2px 8px rgba(16,185,129,.25)}.btn-green:hover{background:var(--green-d)}
+.btn-orange{background:var(--orange);color:#fff;border-color:var(--orange)}.btn-orange:hover{background:var(--orange-d)}
+.btn-red{background:var(--red);color:#fff;border-color:var(--red)}.btn-red:hover{background:var(--red-d)}
+.btn-purple{background:var(--purple);color:#fff;border-color:var(--purple)}.btn-purple:hover{background:#7C3AED}
+.btn-gray{background:var(--gray-100);color:var(--gray-700);border-color:var(--gray-200)}.btn-gray:hover{background:var(--gray-200)}
+.btn-ghost{background:transparent;color:var(--gray-500);border-color:var(--gray-200)}.btn-ghost:hover{background:var(--gray-100)}
+.btn-wa{background:#075E54;color:#fff;border-color:#075E54}.btn-wa:hover{background:#064e46}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:7px}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:6px}
+.btn-full{width:100%}
+.btn-lg{padding:13px 24px;font-size:14px;border-radius:var(--rl)}
+
+.card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--rl);padding:18px 20px;box-shadow:var(--sh)}
+.card-t{font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.6px;text-transform:uppercase;margin-bottom:12px}
+
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:10px;font-weight:700}
+.bg-green{background:var(--green-l);color:#065F46}
+.bg-red{background:var(--red-l);color:#991B1B}
+.bg-blue{background:var(--blue-l);color:#1D4ED8}
+.bg-orange{background:var(--orange-l);color:#92400E}
+.bg-purple{background:var(--purple-l);color:#5B21B6}
+.bg-gray{background:var(--gray-100);color:var(--gray-500)}
+
+.field{margin-bottom:11px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--gray-500);letter-spacing:.4px;text-transform:uppercase;margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--gray-200);border-radius:var(--r);font-size:12px;font-family:var(--font);color:var(--gray-900);background:var(--white);outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.08)}
+.field input.ro{background:var(--gray-50);color:var(--gray-700);font-family:var(--mono);font-size:11px}
+
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:8px 10px;background:var(--gray-50);color:var(--gray-500);font-weight:600;font-size:10px;letter-spacing:.4px;text-transform:uppercase;text-align:left;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--gray-100);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFC}
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--gray-100)}
+
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-g{background:var(--green)}.dot-r{background:var(--red)}.dot-b{background:var(--blue)}.dot-o{background:var(--orange)}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--gray-900);color:#fff;padding:11px 18px;border-radius:var(--r);font-size:12px;font-weight:500;z-index:9999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ══════════════
+   LOGIN
+══════════════ */
+#pg-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 16px;background:linear-gradient(135deg,#EFF6FF 0%,#F9FAFB 55%,#ECFDF5 100%)}
+.login-wrap{width:100%;max-width:420px}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-icon{width:72px;height:72px;background:var(--blue);border-radius:20px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 10px 28px rgba(59,130,246,.35);margin-bottom:14px}
+.login-icon svg{width:38px;height:38px;fill:#fff}
+.login-app{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.login-sub{font-size:12px;color:var(--gray-400);margin-top:3px}
+.login-card{background:var(--white);border-radius:var(--rxl);border:1px solid var(--gray-200);box-shadow:var(--sh-lg);padding:30px;margin-bottom:14px}
+.login-err{background:var(--red-l);border:1px solid #FECACA;border-radius:var(--r);padding:9px 13px;font-size:12px;font-weight:500;color:var(--red-d);margin-bottom:14px;display:none}
+.login-actions{display:flex;gap:8px;margin-top:18px}
+.role-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rc{background:var(--white);border:1.5px solid var(--gray-200);border-radius:var(--rl);padding:13px 10px;text-align:center;cursor:pointer;transition:all .15s}
+.rc:hover{border-color:var(--blue);box-shadow:0 4px 14px rgba(59,130,246,.12);transform:translateY(-1px)}
+.rc.sel{border-color:var(--blue);background:var(--blue-l)}
+.rc-av{width:38px;height:38px;border-radius:50%;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.av-boss{background:var(--blue)}.av-admin{background:var(--purple)}.av-kasir{background:var(--green)}
+.rc-name{font-size:13px;font-weight:700;color:var(--gray-900)}
+.rc-pw{font-size:10px;color:var(--gray-400);margin-top:2px}
+
+/* ══════════════
+   APP SHELL
+══════════════ */
+#pg-app{display:none;flex-direction:column;min-height:100vh}
+.topbar{height:54px;background:var(--white);border-bottom:1px solid var(--gray-200);display:flex;align-items:center;padding:0 20px;gap:14px;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.topbar-logo{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;min-width:190px}
+.topbar-logo-mark{width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.topbar-logo-mark svg{width:17px;height:17px;fill:#fff}
+.topbar-spacer{flex:1}
+.user-pill{display:flex;align-items:center;gap:8px;padding:5px 13px 5px 5px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:99px}
+.ua{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+.uname{font-size:12px;font-weight:600}
+.urole{font-size:10px;color:var(--gray-400)}
+
+/* ══════════════
+   LAYOUT
+══════════════ */
+.app-body{display:flex;flex:1;min-height:calc(100vh - 54px)}
+.sidebar{width:210px;min-width:210px;background:var(--white);border-right:1px solid var(--gray-200);padding:16px 10px;display:flex;flex-direction:column;gap:2px}
+.sb-sec{font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.7px;text-transform:uppercase;padding:8px 10px 4px;margin-top:6px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--gray-500);font-size:12px;font-weight:500;transition:all .12s;user-select:none}
+.sb-item:hover{background:var(--gray-100);color:var(--gray-900)}
+.sb-item.on{background:var(--blue-l);color:var(--blue);font-weight:600}
+.sb-item svg{width:15px;height:15px;flex-shrink:0}
+.sb-item .sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:9px;font-weight:700}
+.main{flex:1;padding:22px 24px;background:var(--gray-50);overflow-y:auto}
+.page{display:none}.page.on{display:block}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.page-title{font-size:16px;font-weight:700}
+.page-sub{font-size:11px;color:var(--gray-400);margin-top:2px}
+
+/* ══════════════
+   BOSS DASHBOARD
+══════════════ */
+.stats5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--rl);padding:16px 18px;box-shadow:var(--sh)}
+.stat-lbl{font-size:10px;font-weight:600;color:var(--gray-400);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px}
+.stat-val{font-size:20px;font-weight:700;margin-bottom:3px}
+.stat-sub{font-size:10px;font-weight:500}
+.charts2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px}
+
+/* ══════════════
+   KASIR INPUT
+══════════════ */
+.cmd-box{background:var(--white);border:2px solid var(--blue);border-radius:var(--rl);padding:14px 16px;margin-bottom:10px;box-shadow:0 0 0 4px rgba(59,130,246,.07)}
+.cmd-label{font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+.cmd-row{display:flex;align-items:center;gap:8px}
+.cmd-inp{flex:1;border:none;outline:none;font-size:20px;font-weight:700;font-family:var(--mono);background:transparent;color:var(--gray-900);letter-spacing:.5px}
+.cmd-inp::placeholder{color:var(--gray-300);font-weight:400;font-size:15px;font-family:var(--font)}
+.cmd-hint{font-size:11px;color:var(--gray-400);margin-top:6px}
+.cmd-hint b{color:var(--blue);font-family:var(--mono)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{padding:5px 11px;border-radius:99px;border:1px solid var(--gray-200);background:var(--white);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--mono);color:#1D4ED8;transition:all .12s;box-shadow:var(--sh)}
+.chip:hover{background:var(--blue-l);border-color:var(--blue)}
+.bubble{border-radius:9px;padding:9px 12px;font-size:12px;margin-bottom:10px;display:none;line-height:1.6}
+.bub-ok{background:var(--green-l);border:1px solid var(--green-m,#A7F3D0);color:#065F46}
+.bub-err{background:var(--red-l);border:1px solid #FECACA;color:#991B1B}
+.input-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.tier-bars{display:flex;gap:2px;height:26px;border-radius:6px;overflow:hidden;margin:6px 0 3px}
+.tbar{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;transition:all .3s;min-width:4px;font-family:var(--mono)}
+.tier-xlbls{display:flex;justify-content:space-between;font-size:9px;color:var(--gray-400);margin-bottom:8px}
+
+/* ══════════════
+   NOTA
+══════════════ */
+.nota-card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--rl);overflow:hidden;margin-bottom:12px;box-shadow:var(--sh)}
+.nota-hd{background:var(--blue-d);padding:14px 18px;text-align:center}
+.nota-hd-name{font-size:15px;font-weight:700;color:#fff}
+.nota-hd-sub{font-size:10px;color:rgba(255,255,255,.75);margin-top:2px}
+.nota-bd{padding:14px 18px}
+.nr{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--gray-100)}
+.nr:last-child{border-bottom:none}
+.nl{color:var(--gray-400)}
+.nv{font-weight:600}
+.nd{border:none;border-top:1.5px dashed var(--gray-200);margin:8px 0}
+.n-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:6px 0}
+.n-total-v{color:var(--blue);font-family:var(--mono)}
+.n-item{padding:6px 0;border-bottom:1px solid var(--gray-100)}
+.n-item:last-child{border-bottom:none}
+.n-item-main{display:flex;justify-content:space-between;font-size:12px;font-weight:600;margin-bottom:2px}
+.n-item-sub{font-size:11px;color:var(--gray-400)}
+.n-tier{font-size:10px;color:var(--orange-d);font-weight:600;margin-top:1px}
+
+/* ══════════════
+   ADMIN PANEL
+══════════════ */
+.admin-tabs{display:flex;gap:4px;background:var(--gray-100);padding:3px;border-radius:9px;margin-bottom:18px;width:fit-content}
+.atab{padding:6px 16px;border-radius:7px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;color:var(--gray-500);font-family:var(--font);transition:all .14s}
+.atab.on{background:var(--white);color:var(--blue);box-shadow:var(--sh)}
+.form-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.tier-editor{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.tier-row-edit{display:grid;grid-template-columns:70px 70px 1fr 28px;gap:6px;align-items:center;margin-bottom:6px}
+.tier-row-edit input{padding:7px 8px;border:1px solid var(--gray-200);border-radius:7px;font-size:11px;font-family:var(--mono);color:var(--gray-900);background:var(--white);outline:none;width:100%}
+.tier-row-edit input:focus{border-color:var(--blue)}
+.tier-del{width:26px;height:26px;border-radius:6px;border:1px solid var(--gray-200);background:var(--gray-100);cursor:pointer;color:var(--red);font-size:13px;display:flex;align-items:center;justify-content:center}
+.tier-del:hover{background:var(--red-l)}
+.add-tier-btn{width:100%;padding:7px;border-radius:7px;border:1.5px dashed var(--gray-300);background:transparent;color:var(--blue);cursor:pointer;font-size:11px;font-weight:600;font-family:var(--font);transition:all .12s}
+.add-tier-btn:hover{background:var(--blue-l);border-color:var(--blue)}
+.user-av-tbl{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+.sheets-info{background:var(--green-l);border:1px solid #A7F3D0;border-radius:var(--r);padding:12px 14px;margin-bottom:16px;font-size:12px;color:#065F46;line-height:1.6}
+.sheets-info b{color:#059669}
+.sheets-url{font-family:var(--mono);font-size:11px;background:var(--white);border:1px solid #A7F3D0;border-radius:6px;padding:6px 10px;margin-top:6px;word-break:break-all}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:var(--rxl);border:1px solid var(--gray-200);padding:24px;width:460px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-lg)}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:18px}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+
+@media(max-width:768px){
+  .stats5{grid-template-columns:repeat(2,1fr)}
+  .charts2{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .form-2col,.form-3col,.input-2col{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════
+     LOGIN
+══════════════════════════════ -->
+<div id="pg-login">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="login-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+      <div class="login-app">PrintKasir Pro</div>
+      <div class="login-sub">Sistem Kasir Digital Printing 2026</div>
+    </div>
+    <div class="login-card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:18px">Masuk ke Sistem</div>
+      <div class="login-err" id="login-err">Username atau password salah.</div>
+      <div class="field"><label>Username</label><input type="text" id="inp-u" placeholder="Ketik username..." autocomplete="username"></div>
+      <div class="field"><label>Password</label>
+        <div style="position:relative">
+          <input type="password" id="inp-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:40px">
+          <div onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray-400)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="login-actions">
+        <button class="btn btn-blue btn-lg" style="flex:1" onclick="doLogin()">Login</button>
+        <button class="btn btn-gray btn-lg" style="flex:0 0 100px" onclick="resetLogin()">Batal</button>
+      </div>
+    </div>
+    <div style="background:var(--white);border-radius:var(--rxl);border:1px solid var(--gray-200);padding:18px 20px;box-shadow:var(--sh)">
+      <div style="font-size:10px;font-weight:700;color:var(--gray-400);letter-spacing:.6px;text-align:center;margin-bottom:12px;text-transform:uppercase">Pilih Akun Cepat</div>
+      <div class="role-cards">
+        <div class="rc sel" id="rc-boss" onclick="pickRole('boss','1234',this)">
+          <div class="rc-av av-boss">BO</div>
+          <div class="rc-name">boss</div>
+          <div class="rc-pw">pw: 1234</div>
+        </div>
+        <div class="rc" id="rc-admin" onclick="pickRole('admin','1234',this)">
+          <div class="rc-av av-admin">AD</div>
+          <div class="rc-name">admin</div>
+          <div class="rc-pw">pw: 1234</div>
+        </div>
+        <div class="rc" id="rc-kasir" onclick="pickRole('kasir','1234',this)">
+          <div class="rc-av av-kasir">KS</div>
+          <div class="rc-name">kasir</div>
+          <div class="rc-pw">pw: 1234</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MAIN APP
+══════════════════════════════ -->
+<div id="pg-app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-mark"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
+      PrintKasir Pro
+    </div>
+    <div class="topbar-spacer"></div>
+    <div id="sync-badge" style="display:none;align-items:center;gap:5px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:99px;padding:4px 10px;font-size:10px;font-weight:600;color:#065F46">
+      <div style="width:6px;height:6px;border-radius:50%;background:#10B981"></div>
+      Sheets
+    </div>
+    <div class="user-pill">
+      <div class="ua" id="top-av">BO</div>
+      <div><div class="uname" id="top-name">Boss</div><div class="urole" id="top-role">Administrator</div></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Keluar</button>
+  </div>
+
+  <div class="app-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+      <div id="sb-content"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main" id="main-content">
+
+      <!-- ── BOSS: DASHBOARD ── -->
+      <div class="page" id="pg-dashboard">
+        <div class="page-hdr">
+          <div><div class="page-title">Dashboard</div><div class="page-sub" id="dash-date"></div></div>
+          <select style="padding:6px 12px;border:1px solid var(--gray-200);border-radius:8px;font-size:11px;font-family:var(--font);outline:none;color:var(--gray-700)">
+            <option>Hari ini</option><option>Minggu ini</option><option>Bulan ini</option>
+          </select>
+        </div>
+        <div class="stats5" id="dash-stats"></div>
+        <div class="charts2">
+          <div class="card" style="margin-bottom:0"><div class="card-t">Omzet & Laba — 7 Hari</div><div style="position:relative;height:170px"><canvas id="ch-bar"></canvas></div></div>
+          <div class="card" style="margin-bottom:0"><div class="card-t">Status Pembayaran</div><div style="position:relative;height:170px"><canvas id="ch-pie"></canvas></div></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div class="card-t" style="margin:0">Transaksi Terbaru</div>
+            <div style="display:flex;gap:6px">
+              <input type="text" placeholder="Cari..." style="padding:5px 10px;border:1px solid var(--gray-200);border-radius:7px;font-size:11px;font-family:var(--font);outline:none;width:150px">
+              <select style="padding:5px 9px;border:1px solid var(--gray-200);border-radius:7px;font-size:11px;font-family:var(--font);outline:none"><option>Semua</option><option>Lunas</option><option>Belum Lunas</option></select>
+            </div>
+          </div>
+          <div class="tbl-wrap" id="dash-trx"></div>
+        </div>
+      </div>
+
+      <!-- ── BOSS/ADMIN: SEMUA TRANSAKSI ── -->
+      <div class="page" id="pg-transaksi">
+        <div class="page-hdr">
+          <div><div class="page-title">Semua Transaksi</div></div>
+          <button class="btn btn-blue btn-sm" onclick="openModalTrx()">+ Tambah Manual</button>
+        </div>
+        <div class="card">
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <input type="text" placeholder="Cari pelanggan / ID..." style="padding:7px 10px;border:1px solid var(--gray-200);border-radius:8px;font-size:12px;font-family:var(--font);outline:none;flex:1;min-width:140px">
+            <select style="padding:7px 10px;border:1px solid var(--gray-200);border-radius:8px;font-size:12px;font-family:var(--font);outline:none"><option>Semua status</option><option>Lunas</option><option>Belum Lunas</option><option>DP</option></select>
+            <input type="date" style="padding:7px 10px;border:1px solid var(--gray-200);border-radius:8px;font-size:12px;font-family:var(--font);outline:none">
+          </div>
+          <div class="tbl-wrap" id="all-trx-tbl"></div>
+        </div>
+      </div>
+
+      <!-- ── BOSS/ADMIN: PIUTANG ── -->
+      <div class="page" id="pg-piutang">
+        <div class="page-hdr"><div class="page-title">Piutang Pelanggan</div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="piutang-stats"></div>
+        <div class="card"><div class="card-t">Daftar Belum Lunas</div><div class="tbl-wrap" id="piutang-tbl"></div></div>
+      </div>
+
+      <!-- ── BOSS: LAPORAN ── -->
+      <div class="page" id="pg-laporan">
+        <div class="page-hdr"><div class="page-title">Laporan Keuangan</div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="lap-stats"></div>
+        <div class="card"><div class="card-t">Rekap per Barang</div><div class="tbl-wrap" id="lap-tbl"></div></div>
+      </div>
+
+      <!-- ── BOSS: RANKING ── -->
+      <div class="page" id="pg-ranking">
+        <div class="page-hdr"><div class="page-title">Ranking Karyawan</div></div>
+        <div class="card" id="ranking-content"></div>
+      </div>
+
+      <!-- ── ADMIN: KELOLA BARANG ── -->
+      <div class="page" id="pg-barang">
+        <div class="page-hdr">
+          <div><div class="page-title">Kelola Barang & Harga</div><div class="page-sub">Sinkron dengan Google Sheets</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="toast('Sinkron dengan Google Sheets...',2000)">↻ Sync Sheets</button>
+            <button class="btn btn-blue btn-sm" onclick="openModalBarang()">+ Tambah Barang</button>
+          </div>
+        </div>
+        <div class="sheets-info">
+          <b>Google Sheets terhubung.</b> Setiap perubahan di sini otomatis tersimpan ke Sheets. Boss bisa juga edit langsung dari Sheets dan klik Sync.
+          <div class="sheets-url">https://docs.google.com/spreadsheets/d/[ID_SHEETS]/edit#gid=0</div>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap" id="barang-tbl"></div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: KELOLA USER ── -->
+      <div class="page" id="pg-user">
+        <div class="page-hdr">
+          <div><div class="page-title">Kelola User & Akses</div></div>
+          <button class="btn btn-blue btn-sm" onclick="openModalUser()">+ Tambah User</button>
+        </div>
+        <div class="card">
+          <div class="tbl-wrap" id="user-tbl"></div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN: BACKUP ── -->
+      <div class="page" id="pg-backup">
+        <div class="page-hdr"><div class="page-title">Backup & Export</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="card">
+            <div class="card-t">Export Data</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-blue btn-full" onclick="backupJSON()">Download JSON (Harian)</button>
+              <button class="btn btn-ghost btn-full" onclick="backupCSV()">Download CSV (Mingguan)</button>
+              <button class="btn btn-ghost btn-full" onclick="toast('Tersimpan ke Google Drive!')">Sinkron Google Drive</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-t">Jadwal Otomatis</div>
+            <table><tbody>
+              <tr><td>Backup harian</td><td style="text-align:right"><span class="badge bg-green"><span class="dot dot-g"></span>Aktif · 23:00</span></td></tr>
+              <tr><td>Backup mingguan</td><td style="text-align:right"><span class="badge bg-green"><span class="dot dot-g"></span>Aktif · Minggu</span></td></tr>
+              <tr><td>Google Drive</td><td style="text-align:right"><span class="badge bg-blue">Terhubung</span></td></tr>
+              <tr><td>Google Sheets sync</td><td style="text-align:right"><span class="badge bg-green"><span class="dot dot-g"></span>Real-time</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KASIR: INPUT FULLSCREEN ── -->
+      <div class="page" id="pg-kasir-input" style="padding:0;margin:-22px -24px;min-height:calc(100vh - 54px)">
+        <div style="display:grid;grid-template-columns:1fr 360px;height:100%;min-height:calc(100vh - 54px)">
+
+          <!-- LEFT: FORM -->
+          <div style="overflow-y:auto;padding:20px 20px 20px 20px;background:var(--gray-50)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div>
+                <div style="font-size:15px;font-weight:700">Input Transaksi</div>
+                <div style="font-size:11px;color:var(--gray-400)" id="kasir-id-prev"></div>
+              </div>
+            </div>
+
+            <!-- Data Pelanggan -->
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-t">Data Pelanggan</div>
+              <div class="field"><label>Nama Pelanggan</label><input id="k-nama" placeholder="Ketik atau pilih..." type="text" list="list-pel"><datalist id="list-pel"></datalist></div>
+              <div class="field"><label>No. WhatsApp</label><input id="k-wa" placeholder="08xxxxxxxxxx" type="text"></div>
+              <div class="field" style="margin-bottom:0"><label>Deadline Pengerjaan</label><input id="k-deadline" type="date"></div>
+            </div>
+
+            <!-- Detail Pesanan -->
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-t">Detail Pesanan</div>
+              <div class="cmd-box" style="margin-bottom:10px">
+                <div class="cmd-label">Ketik Pesanan Cepat</div>
+                <div class="cmd-row">
+                  <input class="cmd-inp" id="cmd-inp" placeholder="ap 120 cetak 75..." oninput="liveparse()" onkeydown="if(event.key==='Enter')tambahKeKeranjang()">
+                  <button class="btn btn-blue" onclick="tambahKeKeranjang()">+ Keranjang</button>
+                </div>
+                <div class="cmd-hint">Format: <b>kode ukuran cetak qty</b></div>
+              </div>
+              <div class="chips" id="kasir-chips" style="margin-bottom:8px"></div>
+              <div class="bubble" id="kasir-bubble"></div>
+              <div id="kasir-detail" style="display:none">
+                <div id="kasir-rincian" style="margin-bottom:8px"></div>
+                <div style="font-size:10px;font-weight:600;color:var(--gray-400);margin-bottom:4px">TIER HARGA</div>
+                <div class="tier-bars" id="kasir-tbars"></div>
+                <div class="tier-xlbls" id="kasir-txlbls"></div>
+              </div>
+            </div>
+
+            <!-- Foto Nota -->
+            <div class="card" style="margin-bottom:12px">
+              <div class="card-t">Foto Nota</div>
+              <div style="border:1.5px dashed var(--gray-300);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;background:var(--gray-50)" onclick="toast('Pilih foto nota...')">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="1.5" style="display:block;margin:0 auto 6px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                <div style="font-size:12px;color:var(--gray-400)">Upload foto nota / bukti bayar</div>
+              </div>
+              <div class="field" style="margin-top:10px;margin-bottom:0"><label>Atau Link Foto/Drive</label><input type="url" placeholder="https://drive.google.com/..."></div>
+            </div>
+
+            <!-- Vendor -->
+            <div class="card">
+              <div class="card-t">Vendor / Supplier</div>
+              <div class="field" style="margin-bottom:0"><label>Nama Vendor</label><input id="k-vendor" placeholder="Nama vendor/supplier" type="text" list="list-vendor"><datalist id="list-vendor"><option value="Supplier A"><option value="Print Offset B"><option value="Tinta Mas"></datalist></div>
+            </div>
+          </div>
+
+          <!-- RIGHT: KERANJANG + BAYAR -->
+          <div style="background:var(--white);border-left:1px solid var(--gray-200);display:flex;flex-direction:column;height:100%;overflow:hidden">
+            <!-- Cart Header -->
+            <div style="padding:16px 18px 12px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:14px;font-weight:700">Keranjang Pesanan</div>
+              <span id="cart-badge" style="background:var(--blue);color:#fff;border-radius:99px;padding:2px 9px;font-size:11px;font-weight:700">0</span>
+            </div>
+            <!-- Cart Items -->
+            <div id="cart-items" style="flex:1;overflow-y:auto;padding:10px 18px"></div>
+            <!-- Totals + DP + Bayar -->
+            <div style="padding:14px 18px;border-top:1px solid var(--gray-100)">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-400);margin-bottom:4px"><span>Subtotal</span><span id="cart-subtotal">Rp 0</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--green);margin-bottom:6px"><span>Diskon</span><span>- Rp 0</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--gray-100)"><span>Total</span><span id="cart-total" style="color:var(--gray-900)">Rp 0</span></div>
+
+              <!-- Status Pembayaran -->
+              <div class="field" style="margin-bottom:10px">
+                <label>Status Pembayaran</label>
+                <select id="k-bayar" onchange="updateBayarMode()" style="padding:8px 10px;border:1.5px solid var(--gray-200);border-radius:var(--r);font-size:12px;font-family:var(--font);width:100%;outline:none">
+                  <option value="Lunas">Lunas</option>
+                  <option value="DP">Down Payment (DP)</option>
+                  <option value="Belum Lunas">Belum Lunas</option>
+                </select>
+              </div>
+
+              <!-- DP Section -->
+              <div id="dp-section" style="background:var(--orange-l);border:1.5px solid var(--orange-m);border-radius:var(--r);padding:12px;margin-bottom:10px;display:none">
+                <div style="font-size:10px;font-weight:700;color:var(--orange-d);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:5px">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+                  DOWN PAYMENT (DP)
+                </div>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px" id="dp-presets">
+                  <button onclick="setDPPct(25)" style="padding:4px 10px;border-radius:99px;border:1.5px solid var(--orange-m);background:var(--white);color:var(--orange-d);cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font)">25%</button>
+                  <button onclick="setDPPct(30)" style="padding:4px 10px;border-radius:99px;border:1.5px solid var(--orange-m);background:var(--orange);color:#fff;cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font)">30%</button>
+                  <button onclick="setDPPct(50)" style="padding:4px 10px;border-radius:99px;border:1.5px solid var(--orange-m);background:var(--white);color:var(--orange-d);cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font)">50%</button>
+                  <button onclick="setDPPct(70)" style="padding:4px 10px;border-radius:99px;border:1.5px solid var(--orange-m);background:var(--white);color:var(--orange-d);cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font)">70%</button>
+                  <button onclick="setDPPct(0)" style="padding:4px 10px;border-radius:99px;border:1.5px solid var(--orange-m);background:var(--white);color:var(--orange-d);cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font)">Custom</button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                  <div><div style="font-size:10px;font-weight:600;color:var(--orange-d);margin-bottom:3px">NOMINAL DP</div><input id="dp-nominal" type="text" oninput="syncDP('nominal')" style="width:100%;padding:7px 9px;border:1.5px solid var(--orange-m);border-radius:8px;font-size:12px;font-family:var(--mono);outline:none"></div>
+                  <div><div style="font-size:10px;font-weight:600;color:var(--orange-d);margin-bottom:3px">PERSENTASE</div><input id="dp-pct-inp" type="text" oninput="syncDP('pct')" style="width:100%;padding:7px 9px;border:1.5px solid var(--orange-m);border-radius:8px;font-size:12px;font-family:var(--mono);outline:none"></div>
+                </div>
+                <button class="btn btn-orange btn-full" style="margin-bottom:6px;font-size:12px;padding:9px">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+                  Bayar DP dengan QRIS
+                </button>
+                <div id="dp-paid-badge" style="display:none;background:var(--orange);border-radius:8px;padding:8px 12px;display:none;align-items:center;gap:8px">
+                  <span style="font-size:13px">✅</span>
+                  <span style="font-size:12px;font-weight:600;color:#fff">DP Terbayar</span>
+                  <span id="dp-paid-val" style="font-family:var(--mono);font-size:13px;font-weight:700;color:#fff;margin-left:auto">Rp 0</span>
+                </div>
+                <div id="sisa-section" style="display:none;background:var(--blue-l);border:1.5px solid var(--blue-m);border-radius:8px;padding:10px 12px;margin-top:6px">
+                  <div style="display:flex;justify-content:space-between;align-items:center">
+                    <span style="font-size:12px;font-weight:600;color:var(--blue-d)">Sisa Pembayaran</span>
+                    <span id="sisa-val" style="font-size:15px;font-weight:700;color:var(--blue);font-family:var(--mono)">Rp 0</span>
+                  </div>
+                </div>
+                <button id="bayar-sisa-btn" onclick="toast('QRIS Sisa terbuka...')" style="display:none;width:100%;margin-top:6px;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+                  Bayar Sisa dengan QRIS
+                </button>
+              </div>
+
+              <!-- Tombol Proses -->
+              <button onclick="prosesTransaksi()" style="width:100%;padding:15px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);box-shadow:0 4px 14px rgba(16,185,129,.35);transition:all .15s" onmouseover="this.style.background='var(--green-d)'" onmouseout="this.style.background='var(--green)'">
+                🚀 PROSES SEMUA — Simpan + Buat Nota + Kirim WA
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BOSS: NOTA VENDOR ── -->
+      <div class="page" id="pg-nota-vendor">
+        <div class="page-hdr">
+          <div><div class="page-title">Nota Vendor</div></div>
+          <button class="btn btn-blue btn-sm" onclick="openModalNotaVendor()">+ Tambah Nota</button>
+        </div>
+        <div class="card"><div class="tbl-wrap" id="nota-vendor-tbl"></div></div>
+      </div>
+
+      <!-- ── BOSS: HUTANG VENDOR ── -->
+      <div class="page" id="pg-hutang-vendor">
+        <div class="page-hdr"><div class="page-title">Hutang Vendor</div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px" id="hutang-vendor-stats"></div>
+        <div class="card"><div class="tbl-wrap" id="hutang-vendor-tbl"></div></div>
+      </div>
+
+      <!-- ── KASIR: RIWAYAT ── -->
+      <div class="page" id="pg-kasir-riwayat">
+        <div class="page-hdr"><div class="page-title">Riwayat Transaksi Saya</div></div>
+        <div class="card"><div class="tbl-wrap" id="kasir-riwayat-tbl"></div></div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app-body -->
+</div><!-- /pg-app -->
+
+<!-- ══ MODAL BARANG ══ -->
+<div class="modal-bg" id="modal-barang">
+  <div class="modal">
+    <div class="modal-title" id="modal-barang-title">Tambah Barang</div>
+    <div class="form-2col">
+      <div class="field"><label>Kode Barang</label><input id="mb-kode" placeholder="ap, brs, bn..."></div>
+      <div class="field"><label>Nama Barang</label><input id="mb-nama" placeholder="Art Paper A4"></div>
+    </div>
+    <div class="form-2col">
+      <div class="field"><label>Satuan</label><select id="mb-satuan"><option>lembar</option><option>pcs</option><option>meter</option><option>roll</option></select></div>
+      <div class="field"><label>Kategori</label><select id="mb-kategori"><option>Cetak Digital</option><option>Banner</option><option>Stiker</option><option>Kartu</option><option>Lainnya</option></select></div>
+    </div>
+    <div class="tier-editor">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--gray-700)">Harga Bertingkat (Tiered Pricing)</div>
+        <div style="font-size:10px;color:var(--gray-400)">Makin banyak → makin murah</div>
+      </div>
+      <div style="display:grid;grid-template-columns:70px 70px 1fr;gap:6px;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:600;color:var(--gray-400)">Dari</span>
+        <span style="font-size:10px;font-weight:600;color:var(--gray-400)">Sampai</span>
+        <span style="font-size:10px;font-weight:600;color:var(--gray-400)">Harga / satuan (Rp)</span>
+      </div>
+      <div id="tier-editor-rows"></div>
+      <button class="add-tier-btn" onclick="addTierRow()">+ Tambah Tier</button>
+    </div>
+    <div class="field"><label>Harga Modal (Rp)</label><input id="mb-modal" type="number" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" style="flex:1" onclick="closeModal('modal-barang')">Batal</button>
+      <button class="btn btn-blue" style="flex:1" onclick="simpanBarang()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL USER ══ -->
+<div class="modal-bg" id="modal-user">
+  <div class="modal">
+    <div class="modal-title">Tambah / Edit User</div>
+    <div class="field"><label>Nama Lengkap</label><input id="mu-nama" placeholder="Nama lengkap"></div>
+    <div class="form-2col">
+      <div class="field"><label>Username</label><input id="mu-user" placeholder="username"></div>
+      <div class="field"><label>Password</label><input id="mu-pw" type="password" placeholder="••••••"></div>
+    </div>
+    <div class="field"><label>Role</label>
+      <select id="mu-role">
+        <option value="boss">Boss (Akses Penuh)</option>
+        <option value="admin">Admin (Kelola Data)</option>
+        <option value="kasir">Kasir (Input Transaksi)</option>
+      </select>
+    </div>
+    <div class="field"><label>No. WhatsApp</label><input id="mu-wa" placeholder="08xxxxxxxxxx"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" style="flex:1" onclick="closeModal('modal-user')">Batal</button>
+      <button class="btn btn-blue" style="flex:1" onclick="simpanUser()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL TRX MANUAL ══ -->
+<div class="modal-bg" id="modal-trx">
+  <div class="modal">
+    <div class="modal-title">Tambah Transaksi Manual</div>
+    <div class="form-2col">
+      <div class="field"><label>Pelanggan</label><input id="mt-nama" placeholder="Nama pelanggan"></div>
+      <div class="field"><label>WhatsApp</label><input id="mt-wa" placeholder="08xxxxxxxxxx"></div>
+    </div>
+    <div class="form-2col">
+      <div class="field"><label>Kode Barang</label><input id="mt-kode" placeholder="ap, brs..." oninput="autoModalHarga()"></div>
+      <div class="field"><label>Spek / Ukuran</label><input id="mt-spek" placeholder="A4, 3x2m..."></div>
+    </div>
+    <div class="form-2col">
+      <div class="field"><label>Qty</label><input id="mt-qty" type="number" value="1" min="1" oninput="autoModalHarga()"></div>
+      <div class="field"><label>Total (otomatis)</label><input id="mt-total" class="ro" readonly></div>
+    </div>
+    <div class="form-2col">
+      <div class="field"><label>Status Bayar</label><select id="mt-bayar"><option>Lunas</option><option>DP 50%</option><option>DP 30%</option><option>Belum Lunas</option></select></div>
+      <div class="field"><label>Deadline</label><input id="mt-deadline" type="date"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" style="flex:1" onclick="closeModal('modal-trx')">Batal</button>
+      <button class="btn btn-blue" style="flex:1" onclick="simpanTrxModal()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════
+   DATA STORE
+══════════════════════════════ */
+var DB_BARANG = [
+  {kode:'ap', nama:'Art Paper', satuan:'lembar', kategori:'Cetak Digital', modal:300,
+   tiers:[{max:50,h:1000},{max:100,h:800},{max:200,h:650},{max:9999,h:500}]},
+  {kode:'brs', nama:'Brosur A5', satuan:'lembar', kategori:'Cetak Digital', modal:200,
+   tiers:[{max:100,h:500},{max:300,h:400},{max:500,h:320},{max:9999,h:250}]},
+  {kode:'bn', nama:'Banner', satuan:'pcs', kategori:'Banner', modal:90000,
+   tiers:[{max:1,h:150000},{max:5,h:135000},{max:9999,h:120000}]},
+  {kode:'knm', nama:'Kartu Nama', satuan:'pcs', kategori:'Kartu', modal:150,
+   tiers:[{max:50,h:400},{max:100,h:300},{max:200,h:220},{max:9999,h:180}]},
+  {kode:'idc', nama:'ID Card', satuan:'pcs', kategori:'Kartu', modal:5000,
+   tiers:[{max:25,h:12000},{max:50,h:9000},{max:100,h:7500},{max:9999,h:6000}]},
+  {kode:'sp', nama:'Spanduk', satuan:'pcs', kategori:'Banner', modal:120000,
+   tiers:[{max:1,h:200000},{max:3,h:185000},{max:9999,h:170000}]},
+];
+
+var DB_USERS = [
+  {username:'boss',password:'1234',nama:'Boss Sistem',role:'boss',wa:'081111111111',aktif:true},
+  {username:'admin',password:'1234',nama:'Admin Toko',role:'admin',wa:'082222222222',aktif:true},
+  {username:'kasir',password:'1234',nama:'Andi Pratama',role:'kasir',wa:'083333333333',aktif:true},
+];
+
+var DB_TRX = [
+  {id:'INV-2026-04-001',tgl:'2026-04-20',pelanggan:'Budi Santoso',wa:'081234567890',kode:'ap',spek:'A4',qty:75,hargaPer:800,total:60000,modal:22500,bayar:'Lunas',order:'Selesai',kasir:'Andi Pratama',deadline:'2026-04-21',tier:'Tier 2 (51–100 lembar)'},
+  {id:'INV-2026-04-002',tgl:'2026-04-20',pelanggan:'Siti Rahayu',wa:'082345678901',kode:'brs',spek:'A5',qty:200,hargaPer:400,total:80000,modal:40000,bayar:'DP 50%',order:'Dicetak',kasir:'Andi Pratama',deadline:'2026-04-22',tier:'Tier 2 (101–300 lembar)'},
+  {id:'INV-2026-04-003',tgl:'2026-04-19',pelanggan:'CV Maju Jaya',wa:'083456789012',kode:'bn',spek:'3x2m',qty:3,hargaPer:135000,total:405000,modal:270000,bayar:'Lunas',order:'Diambil',kasir:'Andi Pratama',deadline:'2026-04-19',tier:'Tier 2 (2–5 pcs)'},
+  {id:'INV-2026-04-004',tgl:'2026-04-19',pelanggan:'Toko Berkah',wa:'084567890123',kode:'idc',spek:'PVC',qty:50,hargaPer:9000,total:450000,modal:250000,bayar:'Belum Lunas',order:'Diproses',kasir:'Andi Pratama',deadline:'2026-04-24',tier:'Tier 2 (26–50 pcs)'},
+  {id:'INV-2026-04-005',tgl:'2026-04-18',pelanggan:'Ibu Dewi',wa:'085678901234',kode:'knm',spek:'standar',qty:100,hargaPer:300,total:30000,modal:15000,bayar:'Lunas',order:'Diambil',kasir:'Andi Pratama',deadline:'2026-04-18',tier:'Tier 2 (51–100 pcs)'},
+];
+
+var DB_VENDOR_NOTA=[
+  {id:'VN-001',tgl:'2026-04-19',vendor:'Supplier A',total:250000,status:'Lunas',link:'https://drive.google.com/nota1.jpg'},
+  {id:'VN-002',tgl:'2026-04-18',vendor:'Print Offset B',total:380000,status:'Belum Lunas',link:''},
+  {id:'VN-003',tgl:'2026-04-17',vendor:'Tinta Mas',total:150000,status:'Lunas',link:'https://drive.google.com/nota3.jpg'},
+];
+// ══ GANTI dengan URL Apps Script kamu setelah deploy ══
+var API_URL = 'https://script.google.com/macros/s/AKfycbz5uK8edbmqdv9NUwdB_msdDU2310tfEpU4l_t9MLNYGsMDc32O1oyXfPqp5Ls_rahV/exec'
+var USE_SHEETS = API_URL !== ''; // otomatis pakai Sheets kalau URL sudah diisi
+
+var COLORS=['#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4'];
+var currentUser=null, parsedCmd=null, kasirItems=[], trxCtr=6;
+
+/* ══════════════════════════════
+   LOGIN
+══════════════════════════════ */
+function pickRole(u,p,el){
+  document.querySelectorAll('.rc').forEach(r=>r.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('inp-u').value=u;
+  document.getElementById('inp-p').value=p;
+}
+function togglePw(){
+  var inp=document.getElementById('inp-p');
+  inp.type=inp.type==='password'?'text':'password';
+}
+/* ══════════════════════════════
+   API HELPER — Google Sheets
+══════════════════════════════ */
+async function apiGet(action) {
+  if (!USE_SHEETS) return null;
+  try {
+    var res = await fetch(API_URL + '?action=' + action);
+    return await res.json();
+  } catch(e) { console.warn('API error:', e); return null; }
+}
+async function apiPost(body) {
+  if (!USE_SHEETS) return null;
+  try {
+    var res = await fetch(API_URL, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  } catch(e) { console.warn('API error:', e); return null; }
+}
+function showSyncBadge(msg) {
+  var el = document.getElementById('sync-badge');
+  if (el) { el.textContent = msg; el.style.display = 'inline-flex'; setTimeout(()=>el.style.display='none', 2500); }
+}
+
+function doLogin(){
+  var u=document.getElementById('inp-u').value.trim().toLowerCase();
+  var p=document.getElementById('inp-p').value.trim();
+  var err=document.getElementById('login-err');
+  // Coba login via Sheets API dulu, fallback ke local
+  if (USE_SHEETS) {
+    apiPost({action:'login', username:u, password:p}).then(function(res){
+      if (res && res.ok) {
+        currentUser = res.user;
+        err.style.display='none';
+        document.getElementById('pg-login').style.display='none';
+        document.getElementById('pg-app').style.display='flex';
+        loadAllData().then(setupApp);
+      } else {
+        err.style.display='block';
+        document.getElementById('inp-p').value='';
+      }
+    }).catch(function(){
+      // fallback local jika offline
+      loginLocal(u,p,err);
+    });
+  } else {
+    loginLocal(u,p,err);
+  }
+}
+function loginLocal(u,p,err){
+  var found=DB_USERS.find(x=>x.username===u&&x.password===p&&x.aktif);
+  if(found){
+    currentUser=found; err.style.display='none';
+    document.getElementById('pg-login').style.display='none';
+    document.getElementById('pg-app').style.display='flex';
+    setupApp();
+  } else { err.style.display='block'; document.getElementById('inp-p').value=''; }
+}
+async function loadAllData(){
+  // Load semua data dari Sheets paralel
+  var [barangRes, trxRes, vendorRes] = await Promise.all([
+    apiGet('getBarang'),
+    apiGet('getTransaksi'),
+    apiGet('getVendor')
+  ]);
+  if (barangRes && barangRes.ok) DB_BARANG = barangRes.data;
+  if (trxRes && trxRes.ok) DB_TRX = trxRes.data;
+  if (vendorRes && vendorRes.ok) DB_VENDOR_NOTA = vendorRes.data;
+  showSyncBadge('Data diperbarui dari Sheets');
+}
+function resetLogin(){
+  document.getElementById('inp-u').value='';
+  document.getElementById('inp-p').value='';
+  document.getElementById('login-err').style.display='none';
+}
+function doLogout(){
+  currentUser=null;
+  document.getElementById('pg-app').style.display='none';
+  document.getElementById('pg-login').style.display='flex';
+  if(barChart){barChart.destroy();barChart=null;}
+  if(pieChart){pieChart.destroy();pieChart=null;}
+}
+
+/* ══════════════════════════════
+   APP SETUP
+══════════════════════════════ */
+var MENUS={
+  boss:[
+    {sec:'Menu'},
+    {id:'dashboard',label:'Dashboard',icon:'grid'},
+    {id:'transaksi',label:'Transaksi',icon:'list'},
+    {id:'piutang',label:'Piutang',icon:'clock'},
+    {sec:'Vendor'},
+    {id:'nota-vendor',label:'Nota Vendor',icon:'receipt'},
+    {id:'hutang-vendor',label:'Hutang Vendor',icon:'arrowud'},
+    {sec:'Laporan'},
+    {id:'laporan',label:'Laporan',icon:'file'},
+    {id:'ranking',label:'Ranking Karyawan',icon:'star'},
+    {sec:'Sistem'},
+    {id:'user',label:'Data User',icon:'users'},
+    {id:'backup',label:'Backup Data',icon:'upload'},
+  ],
+  admin:[
+    {sec:'Data'},
+    {id:'barang',label:'Kelola Barang & Harga',icon:'tag'},
+    {id:'user',label:'Kelola User',icon:'users'},
+    {id:'transaksi',label:'Semua Transaksi',icon:'list'},
+    {id:'piutang',label:'Piutang',icon:'clock'},
+    {sec:'Sistem'},
+    {id:'backup',label:'Backup & Export',icon:'upload'},
+  ],
+  kasir:[
+    {sec:'Kasir'},
+    {id:'kasir-input',label:'Input Transaksi',icon:'pen'},
+    {id:'kasir-riwayat',label:'Riwayat Saya',icon:'list'},
+  ]
+};
+
+var ICONS={
+  grid:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>',
+  receipt:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="1" width="12" height="14" rx="1"/><path d="M5 5h6M5 8h6M5 11h3"/></svg>',
+  arrowud:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v12M5 5l3-3 3 3M5 11l3 3 3-3"/></svg>',
+  list:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h9M2 12h6"/></svg>',
+  clock:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>',
+  file:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 1H4a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5z"/><path d="M9 1v4h4"/></svg>',
+  star:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l2 4.5L15 6l-3.5 3.5 1 5L8 12l-4.5 2.5 1-5L1 6l5-.5z"/></svg>',
+  upload:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 11V5M5 8l3-3 3 3"/><rect x="2" y="11" width="12" height="4" rx="1"/></svg>',
+  tag:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 1H4L1 4v5l8 8 7-7-7-8z"/><circle cx="4.5" cy="4.5" r="1"/></svg>',
+  users:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-2.8 2.2-5 5-5s5 2.2 5 5"/><circle cx="12" cy="5" r="2"/><path d="M14 12c0-1.7-1-3-2.5-3.5"/></svg>',
+  pen:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 2l3 3-9 9H2v-3z"/></svg>',
+};
+
+function setupApp(){
+  var u=currentUser;
+  var av=document.getElementById('top-av');
+  av.textContent=u.nama.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  av.className='ua '+(u.role==='boss'?'av-boss':u.role==='admin'?'av-admin':'av-kasir');
+  document.getElementById('top-name').textContent=u.nama;
+  document.getElementById('top-role').textContent=u.role==='boss'?'Administrator':u.role==='admin'?'Admin':'Kasir';
+  buildSidebar(u.role);
+  var firstMenu=MENUS[u.role].find(m=>m.id);
+  if(firstMenu) showPage(firstMenu.id);
+  updateDate();
+  buildKasirChips();
+  setDefaultDeadline();
+}
+
+function buildSidebar(role){
+  var sb=document.getElementById('sb-content');
+  var html='';
+  MENUS[role].forEach(function(m){
+    if(m.sec){html+='<div class="sb-sec">'+m.sec+'</div>';return;}
+    html+='<div class="sb-item" id="sb-'+m.id+'" onclick="showPage(\''+m.id+'\')">'+ICONS[m.icon]+'<span>'+m.label+'</span></div>';
+  });
+  sb.innerHTML=html;
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('on'));
+  var pg=document.getElementById('pg-'+id);
+  var sb=document.getElementById('sb-'+id);
+  if(pg) pg.classList.add('on');
+  if(sb) sb.classList.add('on');
+  if(id==='dashboard'){renderDashboard();}
+  else if(id==='transaksi'){renderAllTrx();}
+  else if(id==='piutang'){renderPiutang();}
+  else if(id==='laporan'){renderLaporan();}
+  else if(id==='ranking'){renderRanking();}
+  else if(id==='nota-vendor'){renderNotaVendor();}
+  else if(id==='hutang-vendor'){renderHutangVendor();}
+  else if(id==='barang'){renderBarangTbl();}
+  else if(id==='user'){renderUserTbl();}
+  else if(id==='kasir-riwayat'){renderKasirRiwayat();}
+}
+
+function updateDate(){
+  var d=new Date();
+  var days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  var months=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  var str=days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+  var el=document.getElementById('dash-date');
+  if(el) el.textContent=str;
+}
+
+/* ══════════════════════════════
+   UTILS
+══════════════════════════════ */
+function fmt(n){return Math.round(n).toLocaleString('id-ID');}
+function fmtRp(n){return 'Rp '+fmt(n);}
+function nowId(){var d=new Date();return 'INV-'+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+'-'+String(trxCtr++).padStart(3,'0');}
+function nowDate(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function toast(msg,dur){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),dur||2000);
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+function badgeBayar(s){
+  if(s==='Lunas') return '<span class="badge bg-green"><span class="dot dot-g"></span>Lunas</span>';
+  if(s.startsWith('DP')) return '<span class="badge bg-orange"><span class="dot dot-o"></span>'+s+'</span>';
+  return '<span class="badge bg-red"><span class="dot dot-r"></span>'+s+'</span>';
+}
+function badgeOrder(s){
+  var m={Diproses:'bg-gray',Dicetak:'bg-orange',Selesai:'bg-blue',Diambil:'bg-green'};
+  return '<span class="badge '+(m[s]||'bg-gray')+'">'+s+'</span>';
+}
+function getHarga(b,qty){
+  var t=b.tiers.find(x=>qty<=x.max)||b.tiers[b.tiers.length-1];
+  return t.h;
+}
+function getTierLabel(b,qty){
+  var i=b.tiers.findIndex(x=>qty<=x.max);
+  if(i<0)i=b.tiers.length-1;
+  var t=b.tiers[i];
+  var prev=i>0?b.tiers[i-1].max+1:1;
+  return 'Tier '+(i+1)+' ('+(prev)+'–'+(t.max===9999?'∞':t.max)+' '+b.satuan+')';
+}
+
+/* ══════════════════════════════
+   DASHBOARD (BOSS)
+══════════════════════════════ */
+var barChart=null,pieChart=null;
+function renderDashboard(){
+  var omzet=DB_TRX.reduce((s,t)=>s+t.total,0);
+  var modal=DB_TRX.reduce((s,t)=>s+t.modal,0);
+  var laba=omzet-modal;
+  var piutang=DB_TRX.filter(t=>t.bayar!=='Lunas').reduce((s,t)=>s+t.total,0);
+  document.getElementById('dash-stats').innerHTML=
+    statCard('Omzet','Rp '+fmt(omzet),'color:var(--blue)','↑ +12% kemarin','color:var(--green)')+
+    statCard('Modal','Rp '+fmt(modal),'color:var(--orange)','Estimasi','color:var(--gray-400)')+
+    statCard('Laba','Rp '+fmt(laba),'color:var(--green)','Margin '+Math.round(laba/omzet*100)+'%','color:var(--green)')+
+    statCard('Piutang','Rp '+fmt(piutang),'color:var(--red)',DB_TRX.filter(t=>t.bayar!=='Lunas').length+' transaksi','color:var(--red)')+
+    statCard('Hutang Vendor','Rp 380.000','color:var(--red)','2 vendor','color:var(--red)');
+  renderCharts();
+  var rows=DB_TRX.slice(0,5).map(t=>`<tr>
+    <td><span style="font-family:var(--mono);font-size:11px;color:var(--gray-400)">${t.id}</span></td>
+    <td style="font-weight:600">${t.pelanggan}</td>
+    <td>${t.kode.toUpperCase()} ${t.spek} ×${t.qty}</td>
+    <td style="font-weight:700;color:var(--blue)">${fmtRp(t.total)}</td>
+    <td>${badgeBayar(t.bayar)}</td>
+    <td>${badgeOrder(t.order)}</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="lihatNota('${t.id}')">Nota</button></td>
+  </tr>`).join('');
+  document.getElementById('dash-trx').innerHTML=
+    '<table><thead><tr><th>ID Nota</th><th>Pelanggan</th><th>Barang</th><th>Total</th><th>Bayar</th><th>Order</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+  updateDate();
+}
+function statCard(lbl,val,vstyle,sub,sstyle){
+  return `<div class="stat"><div class="stat-lbl">${lbl}</div><div class="stat-val" style="${vstyle}">${val}</div><div class="stat-sub" style="${sstyle}">${sub}</div></div>`;
+}
+function renderCharts(){
+  if(barChart){barChart.destroy();barChart=null;}
+  if(pieChart){pieChart.destroy();pieChart=null;}
+  var c1=document.getElementById('ch-bar'),c2=document.getElementById('ch-pie');
+  if(!c1||!c2) return;
+  barChart=new Chart(c1,{type:'bar',data:{
+    labels:['Sen','Sel','Rab','Kam','Jum','Sab','Min'],
+    datasets:[
+      {label:'Omzet',data:[820000,1200000,680000,1450000,1025000,1600000,1100000],backgroundColor:'#BFDBFE',borderRadius:5,barPercentage:.55},
+      {label:'Laba',data:[300000,450000,250000,540000,380000,620000,410000],backgroundColor:'#A7F3D0',borderRadius:5,barPercentage:.55}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:10},boxWidth:10}}},scales:{x:{ticks:{font:{size:10}},grid:{display:false}},y:{ticks:{font:{size:10},callback:v=>'Rp '+(v>=1000000?(v/1000000).toFixed(1)+'jt':(v/1000)+'rb')},grid:{color:'rgba(0,0,0,0.04)'}}}}});
+  var lunas=DB_TRX.filter(t=>t.bayar==='Lunas').length;
+  var dp=DB_TRX.filter(t=>t.bayar.startsWith('DP')).length;
+  var hutang=DB_TRX.filter(t=>t.bayar==='Belum Lunas').length;
+  pieChart=new Chart(c2,{type:'doughnut',data:{labels:['Lunas','DP','Belum Lunas'],datasets:[{data:[lunas,dp,hutang],backgroundColor:['#6EE7B7','#FCD34D','#FCA5A5'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:10,padding:8}}}}});
+}
+
+/* ══════════════════════════════
+   ALL TRX
+══════════════════════════════ */
+function renderAllTrx(){
+  var rows=DB_TRX.map(t=>`<tr>
+    <td><span style="font-family:var(--mono);font-size:11px;color:var(--gray-400)">${t.id}</span><br><span style="font-size:10px;color:var(--gray-400)">${t.tgl}</span></td>
+    <td style="font-weight:600">${t.pelanggan}</td>
+    <td>${t.kode.toUpperCase()} ${t.spek}<br><span style="font-size:10px;color:var(--gray-400)">${t.tier}</span></td>
+    <td style="text-align:center">${t.qty}</td>
+    <td style="font-weight:700;color:var(--blue)">${fmtRp(t.total)}</td>
+    <td>${badgeBayar(t.bayar)}</td>
+    <td>${badgeOrder(t.order)}</td>
+    <td style="font-size:11px;color:var(--gray-400)">${t.kasir.split(' ')[0]}</td>
+    <td>
+      ${t.bayar!=='Lunas'?`<button class="btn btn-green btn-xs" onclick="tandaiLunas('${t.id}')">Lunas</button> `:''}
+      <button class="btn btn-ghost btn-xs" onclick="lihatNota('${t.id}')">Nota</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('all-trx-tbl').innerHTML=
+    '<table><thead><tr><th>ID / Tanggal</th><th>Pelanggan</th><th>Barang</th><th>Qty</th><th>Total</th><th>Bayar</th><th>Order</th><th>Kasir</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+function tandaiLunas(id){
+  var t=DB_TRX.find(x=>x.id===id);
+  if(t){t.bayar='Lunas';renderAllTrx();renderPiutang();toast('Ditandai Lunas!');
+    if(USE_SHEETS) apiPost({action:'tandaiLunas',id}).then(()=>showSyncBadge('Status diperbarui di Sheets'));
+  }
+}
+
+/* ══════════════════════════════
+   PIUTANG
+══════════════════════════════ */
+function renderPiutang(){
+  var data=DB_TRX.filter(t=>t.bayar!=='Lunas');
+  var total=data.reduce((s,t)=>s+t.total,0);
+  document.getElementById('piutang-stats').innerHTML=
+    statCard('Jumlah Piutang',data.length+' transaksi','color:var(--red)','Segera tagih','color:var(--red)')+
+    statCard('Total Piutang',fmtRp(total),'color:var(--red)','','color:var(--gray-400)')+
+    statCard('Terbesar',fmtRp(Math.max(...data.map(t=>t.total))),'color:var(--orange)','','color:var(--gray-400)');
+  var rows=data.map(t=>`<tr>
+    <td style="font-weight:600">${t.pelanggan}</td>
+    <td>${t.wa}</td>
+    <td style="font-weight:700;color:var(--red)">${fmtRp(t.total)}</td>
+    <td>${badgeBayar(t.bayar)}</td>
+    <td>${t.deadline}</td>
+    <td>
+      <button class="btn btn-green btn-xs" onclick="tandaiLunas('${t.id}')">Lunas</button>
+      <button class="btn btn-wa btn-xs" onclick="waReminder('${t.wa}','${t.pelanggan}',${t.total})">WA</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('piutang-tbl').innerHTML=
+    '<table><thead><tr><th>Pelanggan</th><th>WhatsApp</th><th>Tagihan</th><th>Status</th><th>Deadline</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+function waReminder(wa,nama,total){
+  var msg='Halo '+nama+', kami mengingatkan tagihan sebesar '+fmtRp(total)+'. Mohon segera dilunasi. Terima kasih - PrintKasir Pro';
+  alert('Simulasi WA ke '+wa+':\n\n'+msg);
+}
+
+/* ══════════════════════════════
+   LAPORAN
+══════════════════════════════ */
+function renderLaporan(){
+  var omzet=DB_TRX.reduce((s,t)=>s+t.total,0);
+  var modal=DB_TRX.reduce((s,t)=>s+t.modal,0);
+  var laba=omzet-modal;
+  document.getElementById('lap-stats').innerHTML=
+    statCard('Total Omzet',fmtRp(omzet),'color:var(--blue)','','color:var(--gray-400)')+
+    statCard('Total Modal',fmtRp(modal),'color:var(--orange)','','color:var(--gray-400)')+
+    statCard('Total Laba',fmtRp(laba),'color:var(--green)','Margin '+Math.round(laba/omzet*100)+'%','color:var(--green)');
+  var map={};
+  DB_TRX.forEach(t=>{
+    if(!map[t.kode])map[t.kode]={nama:t.kode.toUpperCase(),qty:0,omzet:0,modal:0};
+    map[t.kode].qty+=t.qty; map[t.kode].omzet+=t.total; map[t.kode].modal+=t.modal;
+  });
+  var rows=Object.values(map).map(r=>`<tr>
+    <td style="font-weight:600">${r.nama}</td>
+    <td>${fmt(r.qty)}</td>
+    <td style="color:var(--blue);font-weight:600">${fmtRp(r.omzet)}</td>
+    <td>${fmtRp(r.modal)}</td>
+    <td style="color:var(--green);font-weight:700">${fmtRp(r.omzet-r.modal)}</td>
+  </tr>`).join('');
+  document.getElementById('lap-tbl').innerHTML=
+    '<table><thead><tr><th>Barang</th><th>Qty</th><th>Omzet</th><th>Modal</th><th>Laba</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+/* ══════════════════════════════
+   RANKING
+══════════════════════════════ */
+function renderRanking(){
+  var map={};
+  DB_TRX.forEach(t=>{
+    if(!map[t.kasir])map[t.kasir]={nama:t.kasir,count:0,omzet:0,laba:0};
+    map[t.kasir].count++; map[t.kasir].omzet+=t.total; map[t.kasir].laba+=(t.total-t.modal);
+  });
+  var list=Object.values(map).sort((a,b)=>b.omzet-a.omzet);
+  var medals=['🥇','🥈','🥉'];
+  var rows=list.map((k,i)=>`<tr>
+    <td style="font-size:18px;text-align:center">${medals[i]||i+1}</td>
+    <td style="font-weight:700">${k.nama}</td>
+    <td>${k.count} transaksi</td>
+    <td style="font-weight:700;color:var(--blue)">${fmtRp(k.omzet)}</td>
+    <td style="font-weight:700;color:var(--green)">${fmtRp(k.laba)}</td>
+  </tr>`).join('');
+  document.getElementById('ranking-content').innerHTML=
+    '<div class="card-t">Peringkat berdasarkan omzet</div>'+
+    '<table><thead><tr><th></th><th>Karyawan</th><th>Transaksi</th><th>Omzet</th><th>Laba</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+/* ══════════════════════════════
+   KELOLA BARANG (ADMIN)
+══════════════════════════════ */
+function renderBarangTbl(){
+  var rows=DB_BARANG.map((b,i)=>`<tr>
+    <td style="font-family:var(--mono);font-weight:700;color:var(--blue)">${b.kode}</td>
+    <td style="font-weight:600">${b.nama}</td>
+    <td>${b.satuan}</td>
+    <td>${b.kategori}</td>
+    <td style="font-size:11px;color:var(--gray-500)">${b.tiers.map((t,j)=>{
+      var prev=j>0?b.tiers[j-1].max+1:1;
+      return prev+'–'+(t.max===9999?'∞':t.max)+': Rp'+fmt(t.h);
+    }).join(' | ')}</td>
+    <td style="color:var(--orange);font-weight:600">${fmtRp(b.modal)}</td>
+    <td>
+      <button class="btn btn-ghost btn-xs" onclick="editBarang(${i})">Edit</button>
+      <button class="btn btn-red btn-xs" onclick="hapusBarang(${i})">Hapus</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('barang-tbl').innerHTML=
+    '<table><thead><tr><th>Kode</th><th>Nama</th><th>Satuan</th><th>Kategori</th><th>Tier Harga</th><th>Modal</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+var editBarangIdx=-1;
+var tierRowCount=2;
+function openModalBarang(){ editBarangIdx=-1; document.getElementById('modal-barang-title').textContent='Tambah Barang'; resetTierEditor([{max:50,h:1000},{max:9999,h:800}]); openModal('modal-barang'); }
+function editBarang(i){ editBarangIdx=i; var b=DB_BARANG[i]; document.getElementById('modal-barang-title').textContent='Edit: '+b.nama; document.getElementById('mb-kode').value=b.kode; document.getElementById('mb-nama').value=b.nama; document.getElementById('mb-satuan').value=b.satuan; document.getElementById('mb-kategori').value=b.kategori; document.getElementById('mb-modal').value=b.modal; resetTierEditor(b.tiers); openModal('modal-barang'); }
+function resetTierEditor(tiers){
+  document.getElementById('tier-editor-rows').innerHTML='';
+  tiers.forEach((t,i)=>addTierRow(t.max===9999?'':t.max,t.h,i===tiers.length-1));
+}
+function addTierRow(maxV,hV,isLast){
+  var wrap=document.getElementById('tier-editor-rows');
+  var idx=wrap.children.length;
+  var div=document.createElement('div'); div.className='tier-row-edit'; div.id='tier-r-'+idx;
+  var prevMax=idx>0?(parseInt(wrap.children[idx-1].querySelector('[data-max]').value)||0)+1:1;
+  div.innerHTML=
+    '<input value="'+prevMax+'" readonly style="background:var(--gray-50);color:var(--gray-500)">'+
+    '<input value="'+(isLast?'∞':(maxV||''))+'\" placeholder="∞" data-max style="'+(isLast?'background:var(--gray-50);color:var(--gray-500)':'')+'\" '+(isLast?'readonly':' oninput="updateTierRows()"')+'>'+
+    '<input type="number" value="'+(hV||'')+'" placeholder="Harga/satuan">'+
+    '<button class="tier-del" onclick="delTierRow(\'tier-r-'+idx+'\')" '+(idx===0?'disabled':'')+'>×</button>';
+  wrap.appendChild(div);
+}
+function delTierRow(id){ var el=document.getElementById(id); if(el) el.remove(); updateTierRows(); }
+function updateTierRows(){
+  var rows=document.querySelectorAll('.tier-row-edit');
+  rows.forEach(function(r,i){
+    var prevMax=i>0?(parseInt(rows[i-1].querySelector('[data-max]').value)||0)+1:1;
+    r.querySelectorAll('input')[0].value=prevMax;
+  });
+}
+function simpanBarang(){
+  var kode=document.getElementById('mb-kode').value.trim().toLowerCase();
+  var nama=document.getElementById('mb-nama').value.trim();
+  var satuan=document.getElementById('mb-satuan').value;
+  var kategori=document.getElementById('mb-kategori').value;
+  var modal=parseInt(document.getElementById('mb-modal').value)||0;
+  if(!kode||!nama){alert('Kode dan nama wajib diisi!');return;}
+  var rows=document.querySelectorAll('.tier-row-edit');
+  var tiers=[];
+  rows.forEach(function(r,i){
+    var inputs=r.querySelectorAll('input');
+    var maxV=inputs[1].value==='∞'||inputs[1].value===''?9999:parseInt(inputs[1].value)||9999;
+    var hV=parseInt(inputs[2].value)||0;
+    if(hV>0) tiers.push({max:maxV,h:hV});
+  });
+  if(tiers.length===0){alert('Isi minimal 1 tier harga!');return;}
+  tiers[tiers.length-1].max=9999;
+  var obj={kode,nama,satuan,kategori,modal,tiers};
+  if(editBarangIdx>=0){ DB_BARANG[editBarangIdx]=obj; toast('Barang diupdate & sync ke Sheets!'); }
+  else { DB_BARANG.push(obj); toast('Barang ditambahkan & sync ke Sheets!'); }
+  if(USE_SHEETS) apiPost({action:'simpanBarang', barang:obj}).then(()=>showSyncBadge('Barang tersimpan ke Sheets'));
+  closeModal('modal-barang'); renderBarangTbl(); buildKasirChips();
+  document.getElementById('mb-kode').value=''; document.getElementById('mb-nama').value=''; document.getElementById('mb-modal').value='';
+}
+function hapusBarang(i){ if(confirm('Hapus barang '+DB_BARANG[i].nama+'?')){
+    var kode=DB_BARANG[i].kode;
+    DB_BARANG.splice(i,1); renderBarangTbl(); toast('Barang dihapus.');
+    if(USE_SHEETS) apiPost({action:'hapusBarang',kode}).then(()=>showSyncBadge('Dihapus dari Sheets'));
+  } }
+
+/* ══════════════════════════════
+   KELOLA USER (ADMIN)
+══════════════════════════════ */
+function renderUserTbl(){
+  var rows=DB_USERS.map((u,i)=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="user-av-tbl ${u.role==='boss'?'av-boss':u.role==='admin'?'av-admin':'av-kasir'}">${u.nama.split(' ').map(w=>w[0]).join('').slice(0,2)}</div><div><div style="font-weight:600">${u.nama}</div><div style="font-size:10px;color:var(--gray-400)">${u.wa}</div></div></div></td>
+    <td style="font-family:var(--mono);font-size:11px">${u.username}</td>
+    <td><span class="badge ${u.role==='boss'?'bg-blue':u.role==='admin'?'bg-purple':'bg-green'}">${u.role}</span></td>
+    <td><span class="badge ${u.aktif?'bg-green':'bg-red'}">${u.aktif?'Aktif':'Nonaktif'}</span></td>
+    <td>
+      <button class="btn btn-ghost btn-xs" onclick="editUser(${i})">Edit</button>
+      <button class="btn btn-${u.aktif?'red':'green'} btn-xs" onclick="toggleUser(${i})">${u.aktif?'Nonaktifkan':'Aktifkan'}</button>
+    </td>
+  </tr>`).join('');
+  document.getElementById('user-tbl').innerHTML=
+    '<table><thead><tr><th>Nama</th><th>Username</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+function openModalUser(){ document.querySelectorAll('#modal-user input').forEach(i=>i.value=''); openModal('modal-user'); }
+function editUser(i){ var u=DB_USERS[i]; document.getElementById('mu-nama').value=u.nama; document.getElementById('mu-user').value=u.username; document.getElementById('mu-role').value=u.role; document.getElementById('mu-wa').value=u.wa; openModal('modal-user'); }
+function toggleUser(i){ DB_USERS[i].aktif=!DB_USERS[i].aktif; renderUserTbl(); toast('Status user diupdate!'); }
+function simpanUser(){
+  var nama=document.getElementById('mu-nama').value.trim();
+  var user=document.getElementById('mu-user').value.trim().toLowerCase();
+  var pw=document.getElementById('mu-pw').value.trim();
+  var role=document.getElementById('mu-role').value;
+  var wa=document.getElementById('mu-wa').value.trim();
+  if(!nama||!user||!pw){alert('Nama, username, dan password wajib!');return;}
+  var exist=DB_USERS.findIndex(u=>u.username===user);
+  if(exist>=0){ DB_USERS[exist]={...DB_USERS[exist],nama,password:pw,role,wa}; toast('User diupdate!'); }
+  else { DB_USERS.push({username:user,password:pw,nama,role,wa,aktif:true}); toast('User ditambahkan!'); }
+  if(USE_SHEETS) apiPost({action:'simpanUser',user:{username:user,password:pw,nama,role,wa,aktif:true}}).then(()=>showSyncBadge('User tersimpan ke Sheets'));
+  closeModal('modal-user'); renderUserTbl();
+}
+
+/* ══════════════════════════════
+   KASIR — INPUT CEPAT
+══════════════════════════════ */
+function buildKasirChips(){
+  var el=document.getElementById('kasir-chips');
+  if(!el) return;
+  var samples=DB_BARANG.slice(0,5).map(b=>{
+    var ex=b.tiers.length>0?b.tiers[1]||b.tiers[0]:null;
+    var qty=ex?(ex.max===9999?b.tiers[0].max+1:Math.round((b.tiers[0].max+ex.max)/2)):10;
+    return b.kode+' '+(b.satuan==='lembar'?'a4':'std')+' cetak '+qty;
+  });
+  el.innerHTML=samples.map(s=>`<div class="chip" onclick="isiCmd('${s}')">${s}</div>`).join('');
+}
+function setDefaultDeadline(){
+  var el=document.getElementById('k-deadline');
+  if(el){ var d=new Date(); d.setDate(d.getDate()+2); el.value=d.toISOString().split('T')[0]; }
+}
+function isiCmd(v){ var el=document.getElementById('cmd-inp'); if(el){el.value=v;liveparse();el.focus();} }
+
+function parseCmd(raw){
+  var s=raw.trim().toLowerCase();
+  var m=s.match(/^([a-z]+)\s+([\w\d\.\-x]+)\s+cetak\s+(\d+)/);
+  if(!m) return null;
+  var kode=m[1],spek=m[2],qty=parseInt(m[3]);
+  var b=DB_BARANG.find(x=>x.kode===kode);
+  if(!b||!qty) return null;
+  var tidx=b.tiers.findIndex(x=>qty<=x.max); if(tidx<0)tidx=b.tiers.length-1;
+  var tier=b.tiers[tidx];
+  var prev=tidx>0?b.tiers[tidx-1].max+1:1;
+  var sampai=tier.max===9999?'∞':tier.max;
+  return{kode,spek,qty,b,tier,tidx,tierLabel:'Tier '+(tidx+1)+' ('+prev+'–'+sampai+' '+b.satuan+')',hargaPer:tier.h,total:tier.h*qty};
+}
+
+function liveparse(){
+  var v=document.getElementById('cmd-inp').value;
+  var p=parseCmd(v);
+  var bub=document.getElementById('kasir-bubble');
+  var det=document.getElementById('kasir-detail');
+  if(!v){bub.style.display='none';det.style.display='none';parsedCmd=null;return;}
+  if(!p){
+    if(v.length>4){bub.style.display='block';bub.className='bubble bub-err';bub.innerHTML='Belum terbaca — pastikan ada kata <b>cetak</b> dan angka qty. Contoh: <b>ap a4 cetak 75</b>';}
+    det.style.display='none';parsedCmd=null;return;
+  }
+  parsedCmd=p;
+  bub.style.display='block';bub.className='bubble bub-ok';
+  bub.innerHTML='<b>✓ '+p.b.nama+' '+p.spek.toUpperCase()+'</b> · '+p.qty+' '+p.b.satuan+' · <span style="background:var(--orange-l);color:var(--orange-d);padding:1px 7px;border-radius:99px;font-size:10px;font-weight:700">'+p.tierLabel+'</span> · Harga Rp '+fmt(p.hargaPer)+'/'+p.b.satuan+' · Total <b>Rp '+fmt(p.total)+'</b>';
+  det.style.display='grid';
+  document.getElementById('kasir-rincian').innerHTML=
+    drow('Barang',p.b.nama+' '+p.spek.toUpperCase())+
+    drow('Qty',p.qty+' '+p.b.satuan)+
+    drow('Tier','<span style="background:var(--orange-l);color:var(--orange-d);padding:1px 7px;border-radius:99px;font-size:10px;font-weight:700">'+p.tierLabel+'</span>')+
+    drow('Harga / '+p.b.satuan,'<span style="color:var(--blue);font-family:var(--mono)">Rp '+fmt(p.hargaPer)+'</span>')+
+    drow('Total','<span style="color:var(--blue);font-family:var(--mono);font-size:15px;font-weight:700">Rp '+fmt(p.total)+'</span>');
+  var bars='',xlbls='';
+  p.b.tiers.forEach(function(t,i){
+    var prev=i>0?p.b.tiers[i-1].max+1:1;
+    var lbl=prev+'–'+(t.max===9999?'∞':t.max);
+    var active=i===p.tidx;
+    bars+='<div class="tbar" style="flex:1;background:'+COLORS[i%COLORS.length]+';opacity:'+(active?1:.25)+';outline:'+(active?'2px solid var(--gray-900)':'none')+'" title="'+lbl+'">'+fmt(t.h)+'</div>';
+    xlbls+='<span>'+lbl+'</span>';
+  });
+  document.getElementById('kasir-tbars').innerHTML=bars;
+  document.getElementById('kasir-txlbls').innerHTML=xlbls;
+}
+function drow(l,v){ return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--gray-100);font-size:12px"><span style="color:var(--gray-400)">'+l+'</span><span style="font-weight:600">'+v+'</span></div>'; }
+function focusPelanggan(){ liveparse(); if(parsedCmd) document.getElementById('k-nama').focus(); }
+function tambahItem(){tambahKeKeranjang();}
+function _tambahItemOld(){
+  if(!parsedCmd){alert('Ketik pesanan dulu! Contoh: ap a4 cetak 75');return;}
+  var nama=document.getElementById('k-nama').value.trim()||'Pelanggan';
+  var wa=document.getElementById('k-wa').value.trim();
+  var bayar=document.getElementById('k-bayar').value;
+  var deadline=document.getElementById('k-deadline').value;
+  kasirItems.push({...parsedCmd,nama,wa,bayar,deadline});
+  renderKasirNota();
+  document.getElementById('cmd-inp').value='';
+  document.getElementById('kasir-bubble').style.display='none';
+  document.getElementById('kasir-detail').style.display='none';
+  parsedCmd=null;
+}
+function tambahItemLagi(){ document.getElementById('cmd-inp').focus(); }
+function renderKasirNota(){
+  var last=kasirItems[kasirItems.length-1];
+  var grand=kasirItems.reduce((s,i)=>s+i.total,0);
+  var id=nowId(); var tgl=nowDate();
+  var ihtml=kasirItems.map(it=>`
+    <div class="n-item">
+      <div class="n-item-main"><span>${it.b.nama} ${it.spek.toUpperCase()}</span><span>Rp ${fmt(it.total)}</span></div>
+      <div class="n-item-sub">${it.qty} ${it.b.satuan} × Rp ${fmt(it.hargaPer)}</div>
+      <div class="n-tier">${it.tierLabel}</div>
+    </div>`).join('');
+  document.getElementById('kasir-nota-card').innerHTML=`
+    <div class="nota-hd"><div class="nota-hd-name">PrintKasir Pro</div><div class="nota-hd-sub">Nota Resmi Digital Printing</div></div>
+    <div class="nota-bd">
+      <div class="nr"><span class="nl">No. Nota</span><span class="nv" style="font-family:var(--mono);font-size:11px">${id}</span></div>
+      <div class="nr"><span class="nl">Tanggal</span><span class="nv">${tgl}</span></div>
+      <div class="nr"><span class="nl">Pelanggan</span><span class="nv">${last.nama}</span></div>
+      ${last.wa?`<div class="nr"><span class="nl">WhatsApp</span><span class="nv">${last.wa}</span></div>`:''}
+      <hr class="nd">
+      ${ihtml}
+      <hr class="nd">
+      <div class="n-total"><span>Total</span><span class="n-total-v">Rp ${fmt(grand)}</span></div>
+      ${badgeBayar(last.bayar)}
+    </div>`;
+  document.getElementById('kasir-nota-area').style.display='block';
+  var trx={id,tgl,pelanggan:last.nama,wa:last.wa,kode:last.kode,spek:last.spek,qty:last.qty,hargaPer:last.hargaPer,total:grand,modal:kasirItems.reduce((s,i)=>s+i.qty*(i.b.modal||0),0),bayar:last.bayar,order:'Diproses',kasir:currentUser.nama,deadline:last.deadline,tier:last.tierLabel};
+  DB_TRX.unshift(trx);
+}
+function kirimWAKasir(){
+  if(!kasirItems.length) return;
+  var last=kasirItems[kasirItems.length-1];
+  var grand=kasirItems.reduce((s,i)=>s+i.total,0);
+  var baris=kasirItems.map(it=>`• ${it.b.nama} ${it.spek.toUpperCase()} (${it.qty} ${it.b.satuan}) = Rp ${fmt(it.total)}`).join('\n');
+  var msg=`Halo ${last.nama},\n\nNota dari PrintKasir Pro:\n\n${baris}\n\nTotal: *Rp ${fmt(grand)}*\nStatus: ${last.bayar}\n\nTerima kasih!`;
+  if(last.wa){window.open('https://wa.me/62'+last.wa.replace(/^0/,'')+' ?text='+encodeURIComponent(msg));}
+  else{alert('Pesan WA:\n\n'+msg);}
+}
+function resetKasir(){
+  kasirItems=[];parsedCmd=null;
+  document.getElementById('kasir-nota-area').style.display='none';
+  document.getElementById('cmd-inp').value='';
+  document.getElementById('kasir-bubble').style.display='none';
+  document.getElementById('kasir-detail').style.display='none';
+  document.getElementById('k-nama').value='';
+  document.getElementById('k-wa').value='';
+}
+function renderKasirRiwayat(){
+  var data=DB_TRX.filter(t=>t.kasir===currentUser.nama);
+  var rows=data.map(t=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--gray-400)">${t.id}</td>
+    <td>${t.tgl}</td>
+    <td style="font-weight:600">${t.pelanggan}</td>
+    <td>${t.kode.toUpperCase()} ${t.spek}</td>
+    <td style="font-weight:700;color:var(--blue)">${fmtRp(t.total)}</td>
+    <td>${badgeBayar(t.bayar)}</td>
+    <td>${badgeOrder(t.order)}</td>
+    <td><button class="btn btn-ghost btn-xs" onclick="lihatNota('${t.id}')">Nota</button></td>
+  </tr>`).join('');
+  document.getElementById('kasir-riwayat-tbl').innerHTML=
+    '<table><thead><tr><th>ID</th><th>Tanggal</th><th>Pelanggan</th><th>Barang</th><th>Total</th><th>Bayar</th><th>Order</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+/* ══════════════════════════════
+   NOTA VIEWER
+══════════════════════════════ */
+function lihatNota(id){
+  var t=DB_TRX.find(x=>x.id===id);
+  if(!t) return;
+  alert('Nota: '+t.id+'\nPelanggan: '+t.pelanggan+'\nBarang: '+t.kode.toUpperCase()+' '+t.spek+' ×'+t.qty+'\nTier: '+t.tier+'\nHarga: Rp '+fmt(t.hargaPer)+' / satuan\nTotal: Rp '+fmt(t.total)+'\nStatus: '+t.bayar+'\nKasir: '+t.kasir);
+}
+
+/* ══════════════════════════════
+   MODAL TRX MANUAL (BOSS)
+══════════════════════════════ */
+function openModalTrx(){ openModal('modal-trx'); }
+function autoModalHarga(){
+  var kode=document.getElementById('mt-kode').value.trim().toLowerCase();
+  var qty=parseInt(document.getElementById('mt-qty').value)||0;
+  var b=DB_BARANG.find(x=>x.kode===kode);
+  var total=b&&qty?getHarga(b,qty)*qty:0;
+  document.getElementById('mt-total').value=total?fmtRp(total):'';
+}
+function simpanTrxModal(){
+  var nama=document.getElementById('mt-nama').value.trim(); if(!nama){alert('Isi nama!');return;}
+  var kode=document.getElementById('mt-kode').value.trim().toLowerCase();
+  var spek=document.getElementById('mt-spek').value.trim()||'-';
+  var qty=parseInt(document.getElementById('mt-qty').value)||1;
+  var bayar=document.getElementById('mt-bayar').value;
+  var deadline=document.getElementById('mt-deadline').value||nowDate();
+  var b=DB_BARANG.find(x=>x.kode===kode)||{tiers:[{max:9999,h:0}],satuan:'pcs',modal:0};
+  var h=getHarga(b,qty);
+  DB_TRX.unshift({id:nowId(),tgl:nowDate(),pelanggan:nama,wa:document.getElementById('mt-wa').value,kode,spek,qty,hargaPer:h,total:h*qty,modal:qty*(b.modal||0),bayar,order:'Diproses',kasir:currentUser.nama,deadline,tier:getTierLabel(b,qty)});
+  closeModal('modal-trx'); renderAllTrx(); toast('Transaksi ditambahkan!');
+}
+
+/* ══════════════════════════════
+   BACKUP
+══════════════════════════════ */
+function backupJSON(){
+  var data=JSON.stringify({transaksi:DB_TRX,barang:DB_BARANG,users:DB_USERS.map(u=>({...u,password:'***'}))},null,2);
+  dl('backup-'+nowDate()+'.json',data,'application/json');
+}
+function backupCSV(){
+  var h='ID,Tanggal,Pelanggan,WA,Kode,Spek,Qty,Harga,Total,Bayar,Order,Kasir,Tier\n';
+  var r=DB_TRX.map(t=>[t.id,t.tgl,t.pelanggan,t.wa,t.kode,t.spek,t.qty,t.hargaPer,t.total,t.bayar,t.order,t.kasir,t.tier].join(',')).join('\n');
+  dl('transaksi-'+nowDate()+'.csv',h+r,'text/csv');
+}
+function dl(name,data,type){ var b=new Blob([data],{type}); var u=URL.createObjectURL(b); var a=document.createElement('a');a.href=u;a.download=name;a.click(); }
+
+/* ══ NOTA VENDOR ══ */
+function renderNotaVendor(){
+  var rows=DB_VENDOR_NOTA.map((v,i)=>`<tr>
+    <td style="font-family:var(--mono);font-size:11px;color:var(--gray-400)">${v.id}</td>
+    <td>${v.tgl}</td>
+    <td style="font-weight:600">${v.vendor}</td>
+    <td style="font-weight:700;color:var(--blue)">${fmtRp(v.total)}</td>
+    <td>${v.link?`<a href="${v.link}" target="_blank" style="color:var(--blue);font-size:11px">Lihat foto</a>`:'<span style="color:var(--gray-400);font-size:11px">-</span>'}</td>
+    <td>${badgeBayar(v.status)}</td>
+    <td>${v.status!=='Lunas'?`<button class="btn btn-green btn-xs" onclick="lunasVendor(${i})">Lunas</button>`:''}</td>
+  </tr>`).join('');
+  document.getElementById('nota-vendor-tbl').innerHTML=
+    '<table><thead><tr><th>ID</th><th>Tanggal</th><th>Vendor</th><th>Total</th><th>Foto Nota</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+function lunasVendor(i){DB_VENDOR_NOTA[i].status='Lunas';renderNotaVendor();renderHutangVendor();toast('Vendor dilunasi!');}
+function openModalNotaVendor(){
+  var v=prompt('Nama vendor:'); if(!v) return;
+  var t=parseInt(prompt('Total (angka):'))||0; if(!t) return;
+  var s=confirm('Sudah lunas?')?'Lunas':'Belum Lunas';
+  DB_VENDOR_NOTA.unshift({id:'VN-'+String(DB_VENDOR_NOTA.length+1).padStart(3,'0'),tgl:nowDate(),vendor:v,total:t,status:s,link:''});
+  renderNotaVendor();toast('Nota vendor ditambahkan!');
+}
+function renderHutangVendor(){
+  var hutang=DB_VENDOR_NOTA.filter(v=>v.status!=='Lunas');
+  var totalH=hutang.reduce((s,v)=>s+v.total,0);
+  document.getElementById('hutang-vendor-stats').innerHTML=
+    statCard('Vendor Belum Dibayar',hutang.length+' vendor','color:var(--red)','Segera bayar','color:var(--red)')+
+    statCard('Total Hutang',fmtRp(totalH),'color:var(--red)','','color:var(--gray-400)')+
+    statCard('Vendor Lunas',DB_VENDOR_NOTA.filter(v=>v.status==='Lunas').length+' vendor','color:var(--green)','','color:var(--green)');
+  var rows=hutang.map((v,i)=>`<tr>
+    <td style="font-weight:600">${v.vendor}</td>
+    <td>${v.tgl}</td>
+    <td style="font-weight:700;color:var(--red)">${fmtRp(v.total)}</td>
+    <td>${v.link?`<a href="${v.link}" target="_blank" style="color:var(--blue);font-size:11px">Lihat</a>`:'-'}</td>
+    <td><button class="btn btn-green btn-xs" onclick="lunasVendorH('${v.id}')">Tandai Lunas</button></td>
+  </tr>`).join('');
+  document.getElementById('hutang-vendor-tbl').innerHTML=
+    '<table><thead><tr><th>Vendor</th><th>Tanggal</th><th>Total</th><th>Nota</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
+function lunasVendorH(id){var v=DB_VENDOR_NOTA.find(x=>x.id===id);if(v){v.status='Lunas';renderHutangVendor();toast('Vendor dilunasi!');
+  if(USE_SHEETS) apiPost({action:'lunasVendor',id}).then(()=>showSyncBadge('Status vendor diperbarui di Sheets'));
+}}
+
+/* ══ KASIR KERANJANG BARU ══ */
+var keranjang=[];
+function tambahKeKeranjang(){
+  liveparse();
+  if(!parsedCmd){return;}
+  var found=keranjang.find(k=>k.kode===parsedCmd.kode&&k.spek===parsedCmd.spek);
+  if(found){found.qty+=parsedCmd.qty;found.total=found.hargaPer*found.qty;}
+  else{keranjang.push({...parsedCmd});}
+  renderKeranjang();
+  document.getElementById('cmd-inp').value='';
+  document.getElementById('kasir-bubble').style.display='none';
+  document.getElementById('kasir-detail').style.display='none';
+  parsedCmd=null;
+}
+function renderKeranjang(){
+  var badge=document.getElementById('cart-badge');
+  if(badge) badge.textContent=keranjang.length;
+  var subtotal=keranjang.reduce((s,k)=>s+k.total,0);
+  if(document.getElementById('cart-subtotal')) document.getElementById('cart-subtotal').textContent=fmtRp(subtotal);
+  if(document.getElementById('cart-total')) document.getElementById('cart-total').textContent=fmtRp(subtotal);
+  var items=document.getElementById('cart-items');
+  if(!items) return;
+  if(keranjang.length===0){items.innerHTML='<div style="text-align:center;padding:32px 16px;color:var(--gray-300)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg><div style="font-size:12px">Keranjang kosong</div></div>';return;}
+  items.innerHTML=keranjang.map((k,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid var(--gray-100)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--gray-900)">${k.b.nama} ${k.spek.toUpperCase()}</div>
+        <div style="font-size:11px;color:var(--gray-400);margin-top:1px">${fmtRp(k.hargaPer)} × ${k.qty} = <b style="color:var(--gray-700)">${fmtRp(k.total)}</b></div>
+        <div style="font-size:10px;color:var(--orange-d);font-weight:600;margin-top:1px">${k.tierLabel}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+        <button onclick="qtyCart(${i},-1)" style="width:24px;height:24px;border-radius:7px;border:1.5px solid var(--gray-200);background:var(--gray-50);cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">−</button>
+        <span style="font-size:12px;font-weight:700;min-width:22px;text-align:center">${k.qty}</span>
+        <button onclick="qtyCart(${i},1)" style="width:24px;height:24px;border-radius:7px;border:1.5px solid var(--gray-200);background:var(--gray-50);cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">+</button>
+        <button onclick="hapusCart(${i})" style="width:24px;height:24px;border-radius:7px;border:1.5px solid var(--red-l);background:var(--red-l);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--red)">×</button>
+      </div>
+    </div>`).join('');
+  updateDP();
+}
+function qtyCart(i,delta){
+  keranjang[i].qty+=delta;
+  if(keranjang[i].qty<=0){keranjang.splice(i,1);}
+  else{
+    var b=keranjang[i].b;
+    keranjang[i].hargaPer=getHarga(b,keranjang[i].qty);
+    keranjang[i].total=keranjang[i].hargaPer*keranjang[i].qty;
+    keranjang[i].tierLabel=getTierLabel(b,keranjang[i].qty);
+  }
+  renderKeranjang();
+}
+function hapusCart(i){keranjang.splice(i,1);renderKeranjang();}
+var dpPct=30;
+function updateBayarMode(){
+  var v=document.getElementById('k-bayar').value;
+  var sec=document.getElementById('dp-section');
+  if(sec) sec.style.display=v==='DP'?'block':'none';
+  if(v==='DP') setDPPct(dpPct);
+}
+function setDPPct(pct){
+  dpPct=pct;
+  document.querySelectorAll('#dp-presets button').forEach(function(b){
+    var isSel=b.textContent===(pct+'%')||(pct===0&&b.textContent==='Custom');
+    b.style.background=isSel?'var(--orange)':'var(--white)';
+    b.style.color=isSel?'#fff':'var(--orange-d)';
+  });
+  var subtotal=keranjang.reduce((s,k)=>s+k.total,0);
+  var nominal=pct>0?Math.round(subtotal*pct/100):0;
+  if(document.getElementById('dp-nominal')) document.getElementById('dp-nominal').value=nominal?fmt(nominal):'';
+  if(document.getElementById('dp-pct-inp')) document.getElementById('dp-pct-inp').value=pct>0?pct+'%':'';
+  updateSisa(subtotal,nominal);
+}
+function syncDP(from){
+  var subtotal=keranjang.reduce((s,k)=>s+k.total,0);
+  var nominal=0,pct=0;
+  if(from==='nominal'){
+    nominal=parseInt((document.getElementById('dp-nominal').value||'').replace(/\D/g,''))||0;
+    pct=subtotal>0?Math.round(nominal/subtotal*100):0;
+    document.getElementById('dp-pct-inp').value=pct+'%';
+  } else {
+    pct=parseInt((document.getElementById('dp-pct-inp').value||'').replace(/\D/g,''))||0;
+    nominal=Math.round(subtotal*pct/100);
+    document.getElementById('dp-nominal').value=fmt(nominal);
+  }
+  updateSisa(subtotal,nominal);
+}
+function updateSisa(subtotal,nominal){
+  var sisa=subtotal-nominal;
+  var sisaSec=document.getElementById('sisa-section');
+  var sisaVal=document.getElementById('sisa-val');
+  var sisaBtn=document.getElementById('bayar-sisa-btn');
+  if(sisaSec) sisaSec.style.display=nominal>0?'block':'none';
+  if(sisaVal) sisaVal.textContent=fmtRp(sisa);
+  if(sisaBtn) sisaBtn.style.display=nominal>0?'block':'none';
+}
+function updateDP(){
+  var v=document.getElementById('k-bayar');
+  if(v&&v.value==='DP') setDPPct(dpPct);
+}
+function prosesTransaksi(){
+  if(keranjang.length===0){alert('Keranjang masih kosong!');return;}
+  var nama=document.getElementById('k-nama').value.trim()||'Pelanggan';
+  var wa=document.getElementById('k-wa').value.trim();
+  var bayar=document.getElementById('k-bayar').value;
+  var deadline=document.getElementById('k-deadline').value||nowDate();
+  var grand=keranjang.reduce((s,k)=>s+k.total,0);
+  var id=nowId();
+  keranjang.forEach(function(k){
+    DB_TRX.unshift({id,tgl:nowDate(),pelanggan:nama,wa,kode:k.kode,spek:k.spek,qty:k.qty,hargaPer:k.hargaPer,total:k.total,modal:k.qty*(k.b.modal||0),bayar:bayar==='DP'?'DP 30%':bayar,order:'Diproses',kasir:currentUser.nama,deadline,tier:k.tierLabel});
+  });
+  var msg='Halo '+nama+',
+
+Nota PrintKasir Pro:
+
+'+keranjang.map(k=>'• '+k.b.nama+' '+k.spek+' ('+k.qty+' '+k.b.satuan+') = '+fmtRp(k.total)).join('
+')+'
+
+Total: Rp '+fmt(grand)+'
+Status: '+bayar+'
+
+Terima kasih!';
+  toast('Transaksi tersimpan! Nota dibuat.',2500);
+  if(wa){window.open('https://wa.me/62'+wa.replace(/^0/,'')+' ?text='+encodeURIComponent(msg));}
+  if(USE_SHEETS) DB_TRX.slice(0, keranjang.length).forEach(t => apiPost({action:'simpanTransaksi',transaksi:t}));
+  if(USE_SHEETS) showSyncBadge('Tersimpan ke Sheets');
+  keranjang=[];renderKeranjang();
+  document.getElementById('k-nama').value='';
+  document.getElementById('k-wa').value='';
+}
+
+// Init pilih boss di login
+document.getElementById('inp-u').value='boss';
+document.getElementById('inp-p').value='1234';
+</script>
+</body>
+</html>
