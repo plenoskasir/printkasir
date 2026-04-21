@@ -127,6 +127,7 @@ tr:hover td{background:#FAFBFC}
 .sb-item .sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:99px;padding:1px 6px;font-size:9px;font-weight:700}
 .main{flex:1;padding:22px 24px;background:var(--gray-50);overflow-y:auto}
 .page{display:none}.page.on{display:block}
+#pg-kasir-input.on{display:block;padding:0;margin:-22px -24px}
 .page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
 .page-title{font-size:16px;font-weight:700}
 .page-sub{font-size:11px;color:var(--gray-400);margin-top:2px}
@@ -225,7 +226,7 @@ tr:hover td{background:#FAFBFC}
 <!-- ══════════════════════════════
      LOGIN
 ══════════════════════════════ -->
-<div id="pg-login">
+<div id="pg-login" style="display:flex">
   <div class="login-wrap">
     <div class="login-logo">
       <div class="login-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H7v-2h5v2zm5-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
@@ -275,7 +276,7 @@ tr:hover td{background:#FAFBFC}
 <!-- ══════════════════════════════
      MAIN APP
 ══════════════════════════════ -->
-<div id="pg-app">
+<div id="pg-app" style="display:none">
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="topbar-logo">
@@ -697,11 +698,12 @@ var DB_VENDOR_NOTA=[
   {id:'VN-003',tgl:'2026-04-17',vendor:'Tinta Mas',total:150000,status:'Lunas',link:'https://drive.google.com/nota3.jpg'},
 ];
 // ══ GANTI dengan URL Apps Script kamu setelah deploy ══
-var API_URL = 'https://script.google.com/macros/s/AKfycbz5uK8edbmqdv9NUwdB_msdDU2310tfEpU4l_t9MLNYGsMDc32O1oyXfPqp5Ls_rahV/exec'
+var API_URL = 'https://script.google.com/macros/s/AKfycbz5uK8edbmqdv9NUwdB_msdDU2310tfEpU4l_t9MLNYGsMDc32O1oyXfPqp5Ls_rahV/exec'; // contoh: 'https://script.google.com/macros/s/AKfycb.../exec'
 var USE_SHEETS = API_URL !== ''; // otomatis pakai Sheets kalau URL sudah diisi
 
 var COLORS=['#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#06B6D4'];
-var currentUser=null, parsedCmd=null, kasirItems=[], trxCtr=6;
+var currentUser=null, parsedCmd=null, trxCtr=6;
+var kasirItems=[], keranjang=[];
 
 /* ══════════════════════════════
    LOGIN
@@ -1041,527 +1043,7 @@ function renderPiutang(){
     '<table><thead><tr><th>Pelanggan</th><th>WhatsApp</th><th>Tagihan</th><th>Status</th><th>Deadline</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
 }
 function waReminder(wa,nama,total){
-  var msg='Halo '+nama+', kami mengingatkan tagihan sebesar '+fmtRp(total)+'. Mohon segera dilunasi. Terima kasih - PrintKasir Pro';
-  alert('Simulasi WA ke '+wa+':\n\n'+msg);
-}
-
-/* ══════════════════════════════
-   LAPORAN
-══════════════════════════════ */
-function renderLaporan(){
-  var omzet=DB_TRX.reduce((s,t)=>s+t.total,0);
-  var modal=DB_TRX.reduce((s,t)=>s+t.modal,0);
-  var laba=omzet-modal;
-  document.getElementById('lap-stats').innerHTML=
-    statCard('Total Omzet',fmtRp(omzet),'color:var(--blue)','','color:var(--gray-400)')+
-    statCard('Total Modal',fmtRp(modal),'color:var(--orange)','','color:var(--gray-400)')+
-    statCard('Total Laba',fmtRp(laba),'color:var(--green)','Margin '+Math.round(laba/omzet*100)+'%','color:var(--green)');
-  var map={};
-  DB_TRX.forEach(t=>{
-    if(!map[t.kode])map[t.kode]={nama:t.kode.toUpperCase(),qty:0,omzet:0,modal:0};
-    map[t.kode].qty+=t.qty; map[t.kode].omzet+=t.total; map[t.kode].modal+=t.modal;
-  });
-  var rows=Object.values(map).map(r=>`<tr>
-    <td style="font-weight:600">${r.nama}</td>
-    <td>${fmt(r.qty)}</td>
-    <td style="color:var(--blue);font-weight:600">${fmtRp(r.omzet)}</td>
-    <td>${fmtRp(r.modal)}</td>
-    <td style="color:var(--green);font-weight:700">${fmtRp(r.omzet-r.modal)}</td>
-  </tr>`).join('');
-  document.getElementById('lap-tbl').innerHTML=
-    '<table><thead><tr><th>Barang</th><th>Qty</th><th>Omzet</th><th>Modal</th><th>Laba</th></tr></thead><tbody>'+rows+'</tbody></table>';
-}
-
-/* ══════════════════════════════
-   RANKING
-══════════════════════════════ */
-function renderRanking(){
-  var map={};
-  DB_TRX.forEach(t=>{
-    if(!map[t.kasir])map[t.kasir]={nama:t.kasir,count:0,omzet:0,laba:0};
-    map[t.kasir].count++; map[t.kasir].omzet+=t.total; map[t.kasir].laba+=(t.total-t.modal);
-  });
-  var list=Object.values(map).sort((a,b)=>b.omzet-a.omzet);
-  var medals=['🥇','🥈','🥉'];
-  var rows=list.map((k,i)=>`<tr>
-    <td style="font-size:18px;text-align:center">${medals[i]||i+1}</td>
-    <td style="font-weight:700">${k.nama}</td>
-    <td>${k.count} transaksi</td>
-    <td style="font-weight:700;color:var(--blue)">${fmtRp(k.omzet)}</td>
-    <td style="font-weight:700;color:var(--green)">${fmtRp(k.laba)}</td>
-  </tr>`).join('');
-  document.getElementById('ranking-content').innerHTML=
-    '<div class="card-t">Peringkat berdasarkan omzet</div>'+
-    '<table><thead><tr><th></th><th>Karyawan</th><th>Transaksi</th><th>Omzet</th><th>Laba</th></tr></thead><tbody>'+rows+'</tbody></table>';
-}
-
-/* ══════════════════════════════
-   KELOLA BARANG (ADMIN)
-══════════════════════════════ */
-function renderBarangTbl(){
-  var rows=DB_BARANG.map((b,i)=>`<tr>
-    <td style="font-family:var(--mono);font-weight:700;color:var(--blue)">${b.kode}</td>
-    <td style="font-weight:600">${b.nama}</td>
-    <td>${b.satuan}</td>
-    <td>${b.kategori}</td>
-    <td style="font-size:11px;color:var(--gray-500)">${b.tiers.map((t,j)=>{
-      var prev=j>0?b.tiers[j-1].max+1:1;
-      return prev+'–'+(t.max===9999?'∞':t.max)+': Rp'+fmt(t.h);
-    }).join(' | ')}</td>
-    <td style="color:var(--orange);font-weight:600">${fmtRp(b.modal)}</td>
-    <td>
-      <button class="btn btn-ghost btn-xs" onclick="editBarang(${i})">Edit</button>
-      <button class="btn btn-red btn-xs" onclick="hapusBarang(${i})">Hapus</button>
-    </td>
-  </tr>`).join('');
-  document.getElementById('barang-tbl').innerHTML=
-    '<table><thead><tr><th>Kode</th><th>Nama</th><th>Satuan</th><th>Kategori</th><th>Tier Harga</th><th>Modal</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
-}
-
-var editBarangIdx=-1;
-var tierRowCount=2;
-function openModalBarang(){ editBarangIdx=-1; document.getElementById('modal-barang-title').textContent='Tambah Barang'; resetTierEditor([{max:50,h:1000},{max:9999,h:800}]); openModal('modal-barang'); }
-function editBarang(i){ editBarangIdx=i; var b=DB_BARANG[i]; document.getElementById('modal-barang-title').textContent='Edit: '+b.nama; document.getElementById('mb-kode').value=b.kode; document.getElementById('mb-nama').value=b.nama; document.getElementById('mb-satuan').value=b.satuan; document.getElementById('mb-kategori').value=b.kategori; document.getElementById('mb-modal').value=b.modal; resetTierEditor(b.tiers); openModal('modal-barang'); }
-function resetTierEditor(tiers){
-  document.getElementById('tier-editor-rows').innerHTML='';
-  tiers.forEach((t,i)=>addTierRow(t.max===9999?'':t.max,t.h,i===tiers.length-1));
-}
-function addTierRow(maxV,hV,isLast){
-  var wrap=document.getElementById('tier-editor-rows');
-  var idx=wrap.children.length;
-  var div=document.createElement('div'); div.className='tier-row-edit'; div.id='tier-r-'+idx;
-  var prevMax=idx>0?(parseInt(wrap.children[idx-1].querySelector('[data-max]').value)||0)+1:1;
-  div.innerHTML=
-    '<input value="'+prevMax+'" readonly style="background:var(--gray-50);color:var(--gray-500)">'+
-    '<input value="'+(isLast?'∞':(maxV||''))+'\" placeholder="∞" data-max style="'+(isLast?'background:var(--gray-50);color:var(--gray-500)':'')+'\" '+(isLast?'readonly':' oninput="updateTierRows()"')+'>'+
-    '<input type="number" value="'+(hV||'')+'" placeholder="Harga/satuan">'+
-    '<button class="tier-del" onclick="delTierRow(\'tier-r-'+idx+'\')" '+(idx===0?'disabled':'')+'>×</button>';
-  wrap.appendChild(div);
-}
-function delTierRow(id){ var el=document.getElementById(id); if(el) el.remove(); updateTierRows(); }
-function updateTierRows(){
-  var rows=document.querySelectorAll('.tier-row-edit');
-  rows.forEach(function(r,i){
-    var prevMax=i>0?(parseInt(rows[i-1].querySelector('[data-max]').value)||0)+1:1;
-    r.querySelectorAll('input')[0].value=prevMax;
-  });
-}
-function simpanBarang(){
-  var kode=document.getElementById('mb-kode').value.trim().toLowerCase();
-  var nama=document.getElementById('mb-nama').value.trim();
-  var satuan=document.getElementById('mb-satuan').value;
-  var kategori=document.getElementById('mb-kategori').value;
-  var modal=parseInt(document.getElementById('mb-modal').value)||0;
-  if(!kode||!nama){alert('Kode dan nama wajib diisi!');return;}
-  var rows=document.querySelectorAll('.tier-row-edit');
-  var tiers=[];
-  rows.forEach(function(r,i){
-    var inputs=r.querySelectorAll('input');
-    var maxV=inputs[1].value==='∞'||inputs[1].value===''?9999:parseInt(inputs[1].value)||9999;
-    var hV=parseInt(inputs[2].value)||0;
-    if(hV>0) tiers.push({max:maxV,h:hV});
-  });
-  if(tiers.length===0){alert('Isi minimal 1 tier harga!');return;}
-  tiers[tiers.length-1].max=9999;
-  var obj={kode,nama,satuan,kategori,modal,tiers};
-  if(editBarangIdx>=0){ DB_BARANG[editBarangIdx]=obj; toast('Barang diupdate & sync ke Sheets!'); }
-  else { DB_BARANG.push(obj); toast('Barang ditambahkan & sync ke Sheets!'); }
-  if(USE_SHEETS) apiPost({action:'simpanBarang', barang:obj}).then(()=>showSyncBadge('Barang tersimpan ke Sheets'));
-  closeModal('modal-barang'); renderBarangTbl(); buildKasirChips();
-  document.getElementById('mb-kode').value=''; document.getElementById('mb-nama').value=''; document.getElementById('mb-modal').value='';
-}
-function hapusBarang(i){ if(confirm('Hapus barang '+DB_BARANG[i].nama+'?')){
-    var kode=DB_BARANG[i].kode;
-    DB_BARANG.splice(i,1); renderBarangTbl(); toast('Barang dihapus.');
-    if(USE_SHEETS) apiPost({action:'hapusBarang',kode}).then(()=>showSyncBadge('Dihapus dari Sheets'));
-  } }
-
-/* ══════════════════════════════
-   KELOLA USER (ADMIN)
-══════════════════════════════ */
-function renderUserTbl(){
-  var rows=DB_USERS.map((u,i)=>`<tr>
-    <td><div style="display:flex;align-items:center;gap:8px"><div class="user-av-tbl ${u.role==='boss'?'av-boss':u.role==='admin'?'av-admin':'av-kasir'}">${u.nama.split(' ').map(w=>w[0]).join('').slice(0,2)}</div><div><div style="font-weight:600">${u.nama}</div><div style="font-size:10px;color:var(--gray-400)">${u.wa}</div></div></div></td>
-    <td style="font-family:var(--mono);font-size:11px">${u.username}</td>
-    <td><span class="badge ${u.role==='boss'?'bg-blue':u.role==='admin'?'bg-purple':'bg-green'}">${u.role}</span></td>
-    <td><span class="badge ${u.aktif?'bg-green':'bg-red'}">${u.aktif?'Aktif':'Nonaktif'}</span></td>
-    <td>
-      <button class="btn btn-ghost btn-xs" onclick="editUser(${i})">Edit</button>
-      <button class="btn btn-${u.aktif?'red':'green'} btn-xs" onclick="toggleUser(${i})">${u.aktif?'Nonaktifkan':'Aktifkan'}</button>
-    </td>
-  </tr>`).join('');
-  document.getElementById('user-tbl').innerHTML=
-    '<table><thead><tr><th>Nama</th><th>Username</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
-}
-function openModalUser(){ document.querySelectorAll('#modal-user input').forEach(i=>i.value=''); openModal('modal-user'); }
-function editUser(i){ var u=DB_USERS[i]; document.getElementById('mu-nama').value=u.nama; document.getElementById('mu-user').value=u.username; document.getElementById('mu-role').value=u.role; document.getElementById('mu-wa').value=u.wa; openModal('modal-user'); }
-function toggleUser(i){ DB_USERS[i].aktif=!DB_USERS[i].aktif; renderUserTbl(); toast('Status user diupdate!'); }
-function simpanUser(){
-  var nama=document.getElementById('mu-nama').value.trim();
-  var user=document.getElementById('mu-user').value.trim().toLowerCase();
-  var pw=document.getElementById('mu-pw').value.trim();
-  var role=document.getElementById('mu-role').value;
-  var wa=document.getElementById('mu-wa').value.trim();
-  if(!nama||!user||!pw){alert('Nama, username, dan password wajib!');return;}
-  var exist=DB_USERS.findIndex(u=>u.username===user);
-  if(exist>=0){ DB_USERS[exist]={...DB_USERS[exist],nama,password:pw,role,wa}; toast('User diupdate!'); }
-  else { DB_USERS.push({username:user,password:pw,nama,role,wa,aktif:true}); toast('User ditambahkan!'); }
-  if(USE_SHEETS) apiPost({action:'simpanUser',user:{username:user,password:pw,nama,role,wa,aktif:true}}).then(()=>showSyncBadge('User tersimpan ke Sheets'));
-  closeModal('modal-user'); renderUserTbl();
-}
-
-/* ══════════════════════════════
-   KASIR — INPUT CEPAT
-══════════════════════════════ */
-function buildKasirChips(){
-  var el=document.getElementById('kasir-chips');
-  if(!el) return;
-  var samples=DB_BARANG.slice(0,5).map(b=>{
-    var ex=b.tiers.length>0?b.tiers[1]||b.tiers[0]:null;
-    var qty=ex?(ex.max===9999?b.tiers[0].max+1:Math.round((b.tiers[0].max+ex.max)/2)):10;
-    return b.kode+' '+(b.satuan==='lembar'?'a4':'std')+' cetak '+qty;
-  });
-  el.innerHTML=samples.map(s=>`<div class="chip" onclick="isiCmd('${s}')">${s}</div>`).join('');
-}
-function setDefaultDeadline(){
-  var el=document.getElementById('k-deadline');
-  if(el){ var d=new Date(); d.setDate(d.getDate()+2); el.value=d.toISOString().split('T')[0]; }
-}
-function isiCmd(v){ var el=document.getElementById('cmd-inp'); if(el){el.value=v;liveparse();el.focus();} }
-
-function parseCmd(raw){
-  var s=raw.trim().toLowerCase();
-  var m=s.match(/^([a-z]+)\s+([\w\d\.\-x]+)\s+cetak\s+(\d+)/);
-  if(!m) return null;
-  var kode=m[1],spek=m[2],qty=parseInt(m[3]);
-  var b=DB_BARANG.find(x=>x.kode===kode);
-  if(!b||!qty) return null;
-  var tidx=b.tiers.findIndex(x=>qty<=x.max); if(tidx<0)tidx=b.tiers.length-1;
-  var tier=b.tiers[tidx];
-  var prev=tidx>0?b.tiers[tidx-1].max+1:1;
-  var sampai=tier.max===9999?'∞':tier.max;
-  return{kode,spek,qty,b,tier,tidx,tierLabel:'Tier '+(tidx+1)+' ('+prev+'–'+sampai+' '+b.satuan+')',hargaPer:tier.h,total:tier.h*qty};
-}
-
-function liveparse(){
-  var v=document.getElementById('cmd-inp').value;
-  var p=parseCmd(v);
-  var bub=document.getElementById('kasir-bubble');
-  var det=document.getElementById('kasir-detail');
-  if(!v){bub.style.display='none';det.style.display='none';parsedCmd=null;return;}
-  if(!p){
-    if(v.length>4){bub.style.display='block';bub.className='bubble bub-err';bub.innerHTML='Belum terbaca — pastikan ada kata <b>cetak</b> dan angka qty. Contoh: <b>ap a4 cetak 75</b>';}
-    det.style.display='none';parsedCmd=null;return;
-  }
-  parsedCmd=p;
-  bub.style.display='block';bub.className='bubble bub-ok';
-  bub.innerHTML='<b>✓ '+p.b.nama+' '+p.spek.toUpperCase()+'</b> · '+p.qty+' '+p.b.satuan+' · <span style="background:var(--orange-l);color:var(--orange-d);padding:1px 7px;border-radius:99px;font-size:10px;font-weight:700">'+p.tierLabel+'</span> · Harga Rp '+fmt(p.hargaPer)+'/'+p.b.satuan+' · Total <b>Rp '+fmt(p.total)+'</b>';
-  det.style.display='grid';
-  document.getElementById('kasir-rincian').innerHTML=
-    drow('Barang',p.b.nama+' '+p.spek.toUpperCase())+
-    drow('Qty',p.qty+' '+p.b.satuan)+
-    drow('Tier','<span style="background:var(--orange-l);color:var(--orange-d);padding:1px 7px;border-radius:99px;font-size:10px;font-weight:700">'+p.tierLabel+'</span>')+
-    drow('Harga / '+p.b.satuan,'<span style="color:var(--blue);font-family:var(--mono)">Rp '+fmt(p.hargaPer)+'</span>')+
-    drow('Total','<span style="color:var(--blue);font-family:var(--mono);font-size:15px;font-weight:700">Rp '+fmt(p.total)+'</span>');
-  var bars='',xlbls='';
-  p.b.tiers.forEach(function(t,i){
-    var prev=i>0?p.b.tiers[i-1].max+1:1;
-    var lbl=prev+'–'+(t.max===9999?'∞':t.max);
-    var active=i===p.tidx;
-    bars+='<div class="tbar" style="flex:1;background:'+COLORS[i%COLORS.length]+';opacity:'+(active?1:.25)+';outline:'+(active?'2px solid var(--gray-900)':'none')+'" title="'+lbl+'">'+fmt(t.h)+'</div>';
-    xlbls+='<span>'+lbl+'</span>';
-  });
-  document.getElementById('kasir-tbars').innerHTML=bars;
-  document.getElementById('kasir-txlbls').innerHTML=xlbls;
-}
-function drow(l,v){ return '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--gray-100);font-size:12px"><span style="color:var(--gray-400)">'+l+'</span><span style="font-weight:600">'+v+'</span></div>'; }
-function focusPelanggan(){ liveparse(); if(parsedCmd) document.getElementById('k-nama').focus(); }
-function tambahItem(){tambahKeKeranjang();}
-function _tambahItemOld(){
-  if(!parsedCmd){alert('Ketik pesanan dulu! Contoh: ap a4 cetak 75');return;}
-  var nama=document.getElementById('k-nama').value.trim()||'Pelanggan';
-  var wa=document.getElementById('k-wa').value.trim();
-  var bayar=document.getElementById('k-bayar').value;
-  var deadline=document.getElementById('k-deadline').value;
-  kasirItems.push({...parsedCmd,nama,wa,bayar,deadline});
-  renderKasirNota();
-  document.getElementById('cmd-inp').value='';
-  document.getElementById('kasir-bubble').style.display='none';
-  document.getElementById('kasir-detail').style.display='none';
-  parsedCmd=null;
-}
-function tambahItemLagi(){ document.getElementById('cmd-inp').focus(); }
-function renderKasirNota(){
-  var last=kasirItems[kasirItems.length-1];
-  var grand=kasirItems.reduce((s,i)=>s+i.total,0);
-  var id=nowId(); var tgl=nowDate();
-  var ihtml=kasirItems.map(it=>`
-    <div class="n-item">
-      <div class="n-item-main"><span>${it.b.nama} ${it.spek.toUpperCase()}</span><span>Rp ${fmt(it.total)}</span></div>
-      <div class="n-item-sub">${it.qty} ${it.b.satuan} × Rp ${fmt(it.hargaPer)}</div>
-      <div class="n-tier">${it.tierLabel}</div>
-    </div>`).join('');
-  document.getElementById('kasir-nota-card').innerHTML=`
-    <div class="nota-hd"><div class="nota-hd-name">PrintKasir Pro</div><div class="nota-hd-sub">Nota Resmi Digital Printing</div></div>
-    <div class="nota-bd">
-      <div class="nr"><span class="nl">No. Nota</span><span class="nv" style="font-family:var(--mono);font-size:11px">${id}</span></div>
-      <div class="nr"><span class="nl">Tanggal</span><span class="nv">${tgl}</span></div>
-      <div class="nr"><span class="nl">Pelanggan</span><span class="nv">${last.nama}</span></div>
-      ${last.wa?`<div class="nr"><span class="nl">WhatsApp</span><span class="nv">${last.wa}</span></div>`:''}
-      <hr class="nd">
-      ${ihtml}
-      <hr class="nd">
-      <div class="n-total"><span>Total</span><span class="n-total-v">Rp ${fmt(grand)}</span></div>
-      ${badgeBayar(last.bayar)}
-    </div>`;
-  document.getElementById('kasir-nota-area').style.display='block';
-  var trx={id,tgl,pelanggan:last.nama,wa:last.wa,kode:last.kode,spek:last.spek,qty:last.qty,hargaPer:last.hargaPer,total:grand,modal:kasirItems.reduce((s,i)=>s+i.qty*(i.b.modal||0),0),bayar:last.bayar,order:'Diproses',kasir:currentUser.nama,deadline:last.deadline,tier:last.tierLabel};
-  DB_TRX.unshift(trx);
-}
-function kirimWAKasir(){
-  if(!kasirItems.length) return;
-  var last=kasirItems[kasirItems.length-1];
-  var grand=kasirItems.reduce((s,i)=>s+i.total,0);
-  var baris=kasirItems.map(it=>`• ${it.b.nama} ${it.spek.toUpperCase()} (${it.qty} ${it.b.satuan}) = Rp ${fmt(it.total)}`).join('\n');
-  var msg=`Halo ${last.nama},\n\nNota dari PrintKasir Pro:\n\n${baris}\n\nTotal: *Rp ${fmt(grand)}*\nStatus: ${last.bayar}\n\nTerima kasih!`;
-  if(last.wa){window.open('https://wa.me/62'+last.wa.replace(/^0/,'')+' ?text='+encodeURIComponent(msg));}
-  else{alert('Pesan WA:\n\n'+msg);}
-}
-function resetKasir(){
-  kasirItems=[];parsedCmd=null;
-  document.getElementById('kasir-nota-area').style.display='none';
-  document.getElementById('cmd-inp').value='';
-  document.getElementById('kasir-bubble').style.display='none';
-  document.getElementById('kasir-detail').style.display='none';
-  document.getElementById('k-nama').value='';
-  document.getElementById('k-wa').value='';
-}
-function renderKasirRiwayat(){
-  var data=DB_TRX.filter(t=>t.kasir===currentUser.nama);
-  var rows=data.map(t=>`<tr>
-    <td style="font-family:var(--mono);font-size:11px;color:var(--gray-400)">${t.id}</td>
-    <td>${t.tgl}</td>
-    <td style="font-weight:600">${t.pelanggan}</td>
-    <td>${t.kode.toUpperCase()} ${t.spek}</td>
-    <td style="font-weight:700;color:var(--blue)">${fmtRp(t.total)}</td>
-    <td>${badgeBayar(t.bayar)}</td>
-    <td>${badgeOrder(t.order)}</td>
-    <td><button class="btn btn-ghost btn-xs" onclick="lihatNota('${t.id}')">Nota</button></td>
-  </tr>`).join('');
-  document.getElementById('kasir-riwayat-tbl').innerHTML=
-    '<table><thead><tr><th>ID</th><th>Tanggal</th><th>Pelanggan</th><th>Barang</th><th>Total</th><th>Bayar</th><th>Order</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>';
-}
-
-/* ══════════════════════════════
-   NOTA VIEWER
-══════════════════════════════ */
-function lihatNota(id){
-  var t=DB_TRX.find(x=>x.id===id);
-  if(!t) return;
-  alert('Nota: '+t.id+'\nPelanggan: '+t.pelanggan+'\nBarang: '+t.kode.toUpperCase()+' '+t.spek+' ×'+t.qty+'\nTier: '+t.tier+'\nHarga: Rp '+fmt(t.hargaPer)+' / satuan\nTotal: Rp '+fmt(t.total)+'\nStatus: '+t.bayar+'\nKasir: '+t.kasir);
-}
-
-/* ══════════════════════════════
-   MODAL TRX MANUAL (BOSS)
-══════════════════════════════ */
-function openModalTrx(){ openModal('modal-trx'); }
-function autoModalHarga(){
-  var kode=document.getElementById('mt-kode').value.trim().toLowerCase();
-  var qty=parseInt(document.getElementById('mt-qty').value)||0;
-  var b=DB_BARANG.find(x=>x.kode===kode);
-  var total=b&&qty?getHarga(b,qty)*qty:0;
-  document.getElementById('mt-total').value=total?fmtRp(total):'';
-}
-function simpanTrxModal(){
-  var nama=document.getElementById('mt-nama').value.trim(); if(!nama){alert('Isi nama!');return;}
-  var kode=document.getElementById('mt-kode').value.trim().toLowerCase();
-  var spek=document.getElementById('mt-spek').value.trim()||'-';
-  var qty=parseInt(document.getElementById('mt-qty').value)||1;
-  var bayar=document.getElementById('mt-bayar').value;
-  var deadline=document.getElementById('mt-deadline').value||nowDate();
-  var b=DB_BARANG.find(x=>x.kode===kode)||{tiers:[{max:9999,h:0}],satuan:'pcs',modal:0};
-  var h=getHarga(b,qty);
-  DB_TRX.unshift({id:nowId(),tgl:nowDate(),pelanggan:nama,wa:document.getElementById('mt-wa').value,kode,spek,qty,hargaPer:h,total:h*qty,modal:qty*(b.modal||0),bayar,order:'Diproses',kasir:currentUser.nama,deadline,tier:getTierLabel(b,qty)});
-  closeModal('modal-trx'); renderAllTrx(); toast('Transaksi ditambahkan!');
-}
-
-/* ══════════════════════════════
-   BACKUP
-══════════════════════════════ */
-function backupJSON(){
-  var data=JSON.stringify({transaksi:DB_TRX,barang:DB_BARANG,users:DB_USERS.map(u=>({...u,password:'***'}))},null,2);
-  dl('backup-'+nowDate()+'.json',data,'application/json');
-}
-function backupCSV(){
-  var h='ID,Tanggal,Pelanggan,WA,Kode,Spek,Qty,Harga,Total,Bayar,Order,Kasir,Tier\n';
-  var r=DB_TRX.map(t=>[t.id,t.tgl,t.pelanggan,t.wa,t.kode,t.spek,t.qty,t.hargaPer,t.total,t.bayar,t.order,t.kasir,t.tier].join(',')).join('\n');
-  dl('transaksi-'+nowDate()+'.csv',h+r,'text/csv');
-}
-function dl(name,data,type){ var b=new Blob([data],{type}); var u=URL.createObjectURL(b); var a=document.createElement('a');a.href=u;a.download=name;a.click(); }
-
-/* ══ NOTA VENDOR ══ */
-function renderNotaVendor(){
-  var rows=DB_VENDOR_NOTA.map((v,i)=>`<tr>
-    <td style="font-family:var(--mono);font-size:11px;color:var(--gray-400)">${v.id}</td>
-    <td>${v.tgl}</td>
-    <td style="font-weight:600">${v.vendor}</td>
-    <td style="font-weight:700;color:var(--blue)">${fmtRp(v.total)}</td>
-    <td>${v.link?`<a href="${v.link}" target="_blank" style="color:var(--blue);font-size:11px">Lihat foto</a>`:'<span style="color:var(--gray-400);font-size:11px">-</span>'}</td>
-    <td>${badgeBayar(v.status)}</td>
-    <td>${v.status!=='Lunas'?`<button class="btn btn-green btn-xs" onclick="lunasVendor(${i})">Lunas</button>`:''}</td>
-  </tr>`).join('');
-  document.getElementById('nota-vendor-tbl').innerHTML=
-    '<table><thead><tr><th>ID</th><th>Tanggal</th><th>Vendor</th><th>Total</th><th>Foto Nota</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
-}
-function lunasVendor(i){DB_VENDOR_NOTA[i].status='Lunas';renderNotaVendor();renderHutangVendor();toast('Vendor dilunasi!');}
-function openModalNotaVendor(){
-  var v=prompt('Nama vendor:'); if(!v) return;
-  var t=parseInt(prompt('Total (angka):'))||0; if(!t) return;
-  var s=confirm('Sudah lunas?')?'Lunas':'Belum Lunas';
-  DB_VENDOR_NOTA.unshift({id:'VN-'+String(DB_VENDOR_NOTA.length+1).padStart(3,'0'),tgl:nowDate(),vendor:v,total:t,status:s,link:''});
-  renderNotaVendor();toast('Nota vendor ditambahkan!');
-}
-function renderHutangVendor(){
-  var hutang=DB_VENDOR_NOTA.filter(v=>v.status!=='Lunas');
-  var totalH=hutang.reduce((s,v)=>s+v.total,0);
-  document.getElementById('hutang-vendor-stats').innerHTML=
-    statCard('Vendor Belum Dibayar',hutang.length+' vendor','color:var(--red)','Segera bayar','color:var(--red)')+
-    statCard('Total Hutang',fmtRp(totalH),'color:var(--red)','','color:var(--gray-400)')+
-    statCard('Vendor Lunas',DB_VENDOR_NOTA.filter(v=>v.status==='Lunas').length+' vendor','color:var(--green)','','color:var(--green)');
-  var rows=hutang.map((v,i)=>`<tr>
-    <td style="font-weight:600">${v.vendor}</td>
-    <td>${v.tgl}</td>
-    <td style="font-weight:700;color:var(--red)">${fmtRp(v.total)}</td>
-    <td>${v.link?`<a href="${v.link}" target="_blank" style="color:var(--blue);font-size:11px">Lihat</a>`:'-'}</td>
-    <td><button class="btn btn-green btn-xs" onclick="lunasVendorH('${v.id}')">Tandai Lunas</button></td>
-  </tr>`).join('');
-  document.getElementById('hutang-vendor-tbl').innerHTML=
-    '<table><thead><tr><th>Vendor</th><th>Tanggal</th><th>Total</th><th>Nota</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table>';
-}
-function lunasVendorH(id){var v=DB_VENDOR_NOTA.find(x=>x.id===id);if(v){v.status='Lunas';renderHutangVendor();toast('Vendor dilunasi!');
-  if(USE_SHEETS) apiPost({action:'lunasVendor',id}).then(()=>showSyncBadge('Status vendor diperbarui di Sheets'));
-}}
-
-/* ══ KASIR KERANJANG BARU ══ */
-var keranjang=[];
-function tambahKeKeranjang(){
-  liveparse();
-  if(!parsedCmd){return;}
-  var found=keranjang.find(k=>k.kode===parsedCmd.kode&&k.spek===parsedCmd.spek);
-  if(found){found.qty+=parsedCmd.qty;found.total=found.hargaPer*found.qty;}
-  else{keranjang.push({...parsedCmd});}
-  renderKeranjang();
-  document.getElementById('cmd-inp').value='';
-  document.getElementById('kasir-bubble').style.display='none';
-  document.getElementById('kasir-detail').style.display='none';
-  parsedCmd=null;
-}
-function renderKeranjang(){
-  var badge=document.getElementById('cart-badge');
-  if(badge) badge.textContent=keranjang.length;
-  var subtotal=keranjang.reduce((s,k)=>s+k.total,0);
-  if(document.getElementById('cart-subtotal')) document.getElementById('cart-subtotal').textContent=fmtRp(subtotal);
-  if(document.getElementById('cart-total')) document.getElementById('cart-total').textContent=fmtRp(subtotal);
-  var items=document.getElementById('cart-items');
-  if(!items) return;
-  if(keranjang.length===0){items.innerHTML='<div style="text-align:center;padding:32px 16px;color:var(--gray-300)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg><div style="font-size:12px">Keranjang kosong</div></div>';return;}
-  items.innerHTML=keranjang.map((k,i)=>`
-    <div style="display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-bottom:1px solid var(--gray-100)">
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:600;color:var(--gray-900)">${k.b.nama} ${k.spek.toUpperCase()}</div>
-        <div style="font-size:11px;color:var(--gray-400);margin-top:1px">${fmtRp(k.hargaPer)} × ${k.qty} = <b style="color:var(--gray-700)">${fmtRp(k.total)}</b></div>
-        <div style="font-size:10px;color:var(--orange-d);font-weight:600;margin-top:1px">${k.tierLabel}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-        <button onclick="qtyCart(${i},-1)" style="width:24px;height:24px;border-radius:7px;border:1.5px solid var(--gray-200);background:var(--gray-50);cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">−</button>
-        <span style="font-size:12px;font-weight:700;min-width:22px;text-align:center">${k.qty}</span>
-        <button onclick="qtyCart(${i},1)" style="width:24px;height:24px;border-radius:7px;border:1.5px solid var(--gray-200);background:var(--gray-50);cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">+</button>
-        <button onclick="hapusCart(${i})" style="width:24px;height:24px;border-radius:7px;border:1.5px solid var(--red-l);background:var(--red-l);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--red)">×</button>
-      </div>
-    </div>`).join('');
-  updateDP();
-}
-function qtyCart(i,delta){
-  keranjang[i].qty+=delta;
-  if(keranjang[i].qty<=0){keranjang.splice(i,1);}
-  else{
-    var b=keranjang[i].b;
-    keranjang[i].hargaPer=getHarga(b,keranjang[i].qty);
-    keranjang[i].total=keranjang[i].hargaPer*keranjang[i].qty;
-    keranjang[i].tierLabel=getTierLabel(b,keranjang[i].qty);
-  }
-  renderKeranjang();
-}
-function hapusCart(i){keranjang.splice(i,1);renderKeranjang();}
-var dpPct=30;
-function updateBayarMode(){
-  var v=document.getElementById('k-bayar').value;
-  var sec=document.getElementById('dp-section');
-  if(sec) sec.style.display=v==='DP'?'block':'none';
-  if(v==='DP') setDPPct(dpPct);
-}
-function setDPPct(pct){
-  dpPct=pct;
-  document.querySelectorAll('#dp-presets button').forEach(function(b){
-    var isSel=b.textContent===(pct+'%')||(pct===0&&b.textContent==='Custom');
-    b.style.background=isSel?'var(--orange)':'var(--white)';
-    b.style.color=isSel?'#fff':'var(--orange-d)';
-  });
-  var subtotal=keranjang.reduce((s,k)=>s+k.total,0);
-  var nominal=pct>0?Math.round(subtotal*pct/100):0;
-  if(document.getElementById('dp-nominal')) document.getElementById('dp-nominal').value=nominal?fmt(nominal):'';
-  if(document.getElementById('dp-pct-inp')) document.getElementById('dp-pct-inp').value=pct>0?pct+'%':'';
-  updateSisa(subtotal,nominal);
-}
-function syncDP(from){
-  var subtotal=keranjang.reduce((s,k)=>s+k.total,0);
-  var nominal=0,pct=0;
-  if(from==='nominal'){
-    nominal=parseInt((document.getElementById('dp-nominal').value||'').replace(/\D/g,''))||0;
-    pct=subtotal>0?Math.round(nominal/subtotal*100):0;
-    document.getElementById('dp-pct-inp').value=pct+'%';
-  } else {
-    pct=parseInt((document.getElementById('dp-pct-inp').value||'').replace(/\D/g,''))||0;
-    nominal=Math.round(subtotal*pct/100);
-    document.getElementById('dp-nominal').value=fmt(nominal);
-  }
-  updateSisa(subtotal,nominal);
-}
-function updateSisa(subtotal,nominal){
-  var sisa=subtotal-nominal;
-  var sisaSec=document.getElementById('sisa-section');
-  var sisaVal=document.getElementById('sisa-val');
-  var sisaBtn=document.getElementById('bayar-sisa-btn');
-  if(sisaSec) sisaSec.style.display=nominal>0?'block':'none';
-  if(sisaVal) sisaVal.textContent=fmtRp(sisa);
-  if(sisaBtn) sisaBtn.style.display=nominal>0?'block':'none';
-}
-function updateDP(){
-  var v=document.getElementById('k-bayar');
-  if(v&&v.value==='DP') setDPPct(dpPct);
-}
-function prosesTransaksi(){
-  if(keranjang.length===0){alert('Keranjang masih kosong!');return;}
-  var nama=document.getElementById('k-nama').value.trim()||'Pelanggan';
-  var wa=document.getElementById('k-wa').value.trim();
-  var bayar=document.getElementById('k-bayar').value;
-  var deadline=document.getElementById('k-deadline').value||nowDate();
-  var grand=keranjang.reduce((s,k)=>s+k.total,0);
-  var id=nowId();
-  keranjang.forEach(function(k){
-    DB_TRX.unshift({id,tgl:nowDate(),pelanggan:nama,wa,kode:k.kode,spek:k.spek,qty:k.qty,hargaPer:k.hargaPer,total:k.total,modal:k.qty*(k.b.modal||0),bayar:bayar==='DP'?'DP 30%':bayar,order:'Diproses',kasir:currentUser.nama,deadline,tier:k.tierLabel});
-  });
-  var msg='Halo '+nama+',
-
-Nota PrintKasir Pro:
-
-'+keranjang.map(k=>'• '+k.b.nama+' '+k.spek+' ('+k.qty+' '+k.b.satuan+') = '+fmtRp(k.total)).join('
-')+'
-
-Total: Rp '+fmt(grand)+'
-Status: '+bayar+'
-
-Terima kasih!';
+  var msg='Halo '+nama+',\n\nNota PrintKasir Pro:\n\n'+keranjang.map(k=>'• '+k.b.nama+' '+k.spek+' ('+k.qty+' '+k.b.satuan+') = '+fmtRp(k.total)).join('\n')+'\n\nTotal: Rp '+fmt(grand)+'\nStatus: '+bayar+'\n\nTerima kasih!';
   toast('Transaksi tersimpan! Nota dibuat.',2500);
   if(wa){window.open('https://wa.me/62'+wa.replace(/^0/,'')+' ?text='+encodeURIComponent(msg));}
   if(USE_SHEETS) DB_TRX.slice(0, keranjang.length).forEach(t => apiPost({action:'simpanTransaksi',transaksi:t}));
@@ -1571,9 +1053,13 @@ Terima kasih!';
   document.getElementById('k-wa').value='';
 }
 
-// Init pilih boss di login
+// Init
 document.getElementById('inp-u').value='boss';
 document.getElementById('inp-p').value='1234';
+// Enter di field username pindah ke password
+document.getElementById('inp-u').addEventListener('keydown',function(e){
+  if(e.key==='Enter') document.getElementById('inp-p').focus();
+});
 </script>
 </body>
 </html>
