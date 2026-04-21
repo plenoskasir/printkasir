@@ -234,12 +234,13 @@ tr:hover td{background:#FAFBFC}
       <div class="login-sub">Sistem Kasir Digital Printing 2026</div>
     </div>
     <div class="login-card">
-      <div style="font-size:14px;font-weight:700;margin-bottom:18px">Masuk ke Sistem</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Masuk ke Sistem</div>
+      <div style="font-size:11px;color:#6B7280;margin-bottom:14px">Username: boss &nbsp;|&nbsp; admin &nbsp;|&nbsp; kasir &nbsp;&nbsp;·&nbsp;&nbsp; Password: <b>1234</b></div>
       <div class="login-err" id="login-err">Username atau password salah.</div>
-      <div class="field"><label>Username</label><input type="text" id="inp-u" placeholder="Ketik username..." autocomplete="username"></div>
+      <div class="field"><label>Username</label><input type="text" id="inp-u" placeholder="Ketik username..." autocomplete="off"></div>
       <div class="field"><label>Password</label>
         <div style="position:relative">
-          <input type="password" id="inp-p" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:40px">
+          <input type="password" id="inp-p" readonly onfocus="this.removeAttribute('readonly')" placeholder="••••••" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" style="padding-right:40px">
           <div onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--gray-400)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </div>
@@ -745,20 +746,33 @@ function showSyncBadge(msg) {
 }
 
 function doLogin(){
-  var u = document.getElementById('inp-u').value.trim().toLowerCase();
-  var p = document.getElementById('inp-p').value.trim();
+  var rawU = document.getElementById('inp-u').value;
+  var rawP = document.getElementById('inp-p').value;
+  var u = rawU.trim().toLowerCase();
+  var p = rawP.trim();
   var err = document.getElementById('login-err');
-  var found = DB_USERS.find(function(x){
-    return x.username === u && x.password === p && x.aktif === true;
-  });
+  var found = null;
+  for(var i=0;i<DB_USERS.length;i++){
+    var x = DB_USERS[i];
+    if(x.username === u && x.password === p && x.aktif){
+      found = x; break;
+    }
+  }
   if(found){
     currentUser = found;
     err.style.display = 'none';
-    document.getElementById('pg-login').style.display = 'none';
-    document.getElementById('pg-app').style.display = 'flex';
-    setupApp();
+    try {
+      document.getElementById('pg-login').style.display = 'none';
+      document.getElementById('pg-app').style.display = 'flex';
+      setupApp();
+    } catch(e) {
+      console.error('setupApp error:', e);
+      document.getElementById('pg-login').style.display = 'none';
+      document.getElementById('pg-app').style.display = 'flex';
+    }
   } else {
     err.style.display = 'block';
+    err.textContent = 'Username atau password salah. Coba: boss / 1234';
     document.getElementById('inp-p').value = '';
     document.getElementById('inp-p').focus();
   }
