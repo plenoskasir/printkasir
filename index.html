@@ -709,10 +709,11 @@ var kasirItems=[], keranjang=[];
    LOGIN
 ══════════════════════════════ */
 function pickRole(u,p,el){
-  document.querySelectorAll('.rc').forEach(r=>r.classList.remove('sel'));
+  document.querySelectorAll('.rc').forEach(function(r){r.classList.remove('sel');});
   el.classList.add('sel');
-  document.getElementById('inp-u').value=u;
-  document.getElementById('inp-p').value=p;
+  document.getElementById('inp-u').value = u;
+  document.getElementById('inp-p').value = p;
+  document.getElementById('login-err').style.display = 'none';
 }
 function togglePw(){
   var inp=document.getElementById('inp-p');
@@ -744,28 +745,22 @@ function showSyncBadge(msg) {
 }
 
 function doLogin(){
-  var u=document.getElementById('inp-u').value.trim().toLowerCase();
-  var p=document.getElementById('inp-p').value.trim();
-  var err=document.getElementById('login-err');
-  // Coba login via Sheets API dulu, fallback ke local
-  if (USE_SHEETS) {
-    apiPost({action:'login', username:u, password:p}).then(function(res){
-      if (res && res.ok) {
-        currentUser = res.user;
-        err.style.display='none';
-        document.getElementById('pg-login').style.display='none';
-        document.getElementById('pg-app').style.display='flex';
-        loadAllData().then(setupApp);
-      } else {
-        err.style.display='block';
-        document.getElementById('inp-p').value='';
-      }
-    }).catch(function(){
-      // fallback local jika offline
-      loginLocal(u,p,err);
-    });
+  var u = document.getElementById('inp-u').value.trim().toLowerCase();
+  var p = document.getElementById('inp-p').value.trim();
+  var err = document.getElementById('login-err');
+  var found = DB_USERS.find(function(x){
+    return x.username === u && x.password === p && x.aktif === true;
+  });
+  if(found){
+    currentUser = found;
+    err.style.display = 'none';
+    document.getElementById('pg-login').style.display = 'none';
+    document.getElementById('pg-app').style.display = 'flex';
+    setupApp();
   } else {
-    loginLocal(u,p,err);
+    err.style.display = 'block';
+    document.getElementById('inp-p').value = '';
+    document.getElementById('inp-p').focus();
   }
 }
 function loginLocal(u,p,err){
